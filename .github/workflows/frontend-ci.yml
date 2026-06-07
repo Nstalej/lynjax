@@ -1,0 +1,81 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  frontend-checks:
+    name: Node / Vite baseline
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies when package.json exists
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No frontend/package.json yet; dependency install skipped."
+            exit 0
+          fi
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run lint script when available
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No frontend/package.json yet; lint skipped."
+            exit 0
+          fi
+          if npm run | grep -qE '^  lint$'; then
+            npm run lint
+          else
+            echo "No lint script yet; lint skipped."
+          fi
+
+      - name: Run tests when available
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No frontend/package.json yet; tests skipped."
+            exit 0
+          fi
+          if npm run | grep -qE '^  test$'; then
+            npm test -- --run
+          else
+            echo "No test script yet; tests skipped."
+          fi
+
+      - name: Build when available
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No frontend/package.json yet; build skipped."
+            exit 0
+          fi
+          if npm run | grep -qE '^  build$'; then
+            npm run build
+          else
+            echo "No build script yet; build skipped."
+          fi

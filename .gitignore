@@ -1,0 +1,73 @@
+# OS/editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Node/Vite
+node_modules/
+frontend/node_modules/
+.npm/
+.pnpm-store/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+*.tsbuildinfo
+
+# Reports and evidence
+reports/generated/
+reports/private/
+reports/**/*.pdf
+reports/**/*.docx
+!reports/templates/
+!reports/examples/
+
+# Lab artifacts
+lab/.state/
+lab/tmp/
+*.pcap
+*.pcapng
+
+# Logs/temp
+logs/
+*.log
+tmp/
+temp/
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Keep workflow definitions tracked
+!.github/
+!.github/workflows/

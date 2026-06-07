@@ -1,0 +1,12 @@
+{
+  "brand": "Lynjax",
+  "tagline": "Intelligent Network Visibility",
+  "colors": {
+    "deepNavy": "#083B5C",
+    "signalBlue": "#0E7490",
+    "traceTeal": "#2DD4BF",
+    "iceBackground": "#F2FAF8",
+    "slateText": "#0F172A",
+    "mutedLine": "#B7CDD1"
+  }
+}
