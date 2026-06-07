@@ -117,6 +117,23 @@ Responsabilidades:
 - Fixtures de targets seguros.
 - Datos mock para demostrar el flujo sin hardware ni redes externas.
 
+Baseline actual:
+
+```text
+lab/
+  README.md
+  docker/
+    docker-compose.yml
+    target-web/
+    target-metadata/
+  sample-data/
+    assessment-scope.json
+    targets.json
+    expected-checks.json
+```
+
+El primer lab expone solamente servicios HTTP locales en `127.0.0.1:18080` y `127.0.0.1:18081`. Esto permite validar conectividad, estado HTTP, captura de headers no sensibles y parseo de fixtures JSON sin tocar redes reales.
+
 ### Scripts — `scripts/`
 
 Responsabilidades:
@@ -144,9 +161,18 @@ Responsabilidades previstas:
 6. Generar reporte markdown/JSON/PDF futuro.
 7. Purgar datos sensibles cuando aplique.
 
+## Flujo de lab local
+
+1. Validar estructura con `bash scripts/lab_validate.sh`.
+2. Levantar targets locales con `bash scripts/lab_up.sh`.
+3. Consumir fixtures desde `lab/sample-data/`.
+4. Ejecutar checks seguros solo contra los targets autorizados.
+5. Detener el lab con `bash scripts/lab_down.sh`.
+
 ## Límites explícitos
 
 - No ejecutar scans agresivos por defecto.
 - No integrar credenciales reales hasta tener flujo de autorización y secret handling.
 - No migrar todo NetVault automáticamente.
 - No añadir GNS3/EVE-NG/VMs complejas antes de tener demo local estable.
+- No ampliar el lab a redes externas sin una autorización explícita y documentada.

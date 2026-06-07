@@ -34,8 +34,11 @@ cd frontend
 npm install
 npm run dev
 
-# Smoke checks futuros
-bash scripts/smoke.sh
+# Local lab
+bash scripts/lab_validate.sh
+bash scripts/lab_up.sh
+bash scripts/lab_smoke.sh
+bash scripts/lab_down.sh
 
 # Tests futuros
 pytest backend/tests -v
@@ -46,5 +49,7 @@ npm test --prefix frontend
 
 - Estructura base creada.
 - Sin migración masiva desde NetVault.
-- Sin remoto Git configurado desde esta tarea.
-- Siguiente paso: crear baseline ejecutable mínimo de backend/frontend y smoke script.
+- Repo público inicializado en GitHub: `Nstalej/lynjax`.
+- CI base de backend/frontend creado.
+- Lab local Docker preparado con fixtures seguros y scripts de validación/arranque/parada.
+- Siguiente paso: crear backend ejecutable mínimo y conectar los checks contra los fixtures del lab.

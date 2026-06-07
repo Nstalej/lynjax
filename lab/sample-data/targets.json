@@ -1,0 +1,22 @@
+{
+  "targets": [
+    {
+      "id": "target-web",
+      "name": "Demo Web Target",
+      "type": "http",
+      "url": "http://localhost:18080/",
+      "compose_service": "target-web",
+      "expected_status": 200,
+      "tags": ["local", "docker", "http"]
+    },
+    {
+      "id": "target-metadata",
+      "name": "Demo Metadata Target",
+      "type": "http-json",
+      "url": "http://localhost:18081/metadata.json",
+      "compose_service": "target-metadata",
+      "expected_status": 200,
+      "tags": ["local", "docker", "fixture"]
+    }
+  ]
+}
