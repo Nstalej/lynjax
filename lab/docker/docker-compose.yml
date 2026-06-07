@@ -1,0 +1,37 @@
+name: lynjax-local-lab
+
+services:
+  target-web:
+    image: nginx:1.27-alpine
+    container_name: lynjax-target-web
+    ports:
+      - "127.0.0.1:18080:80"
+    volumes:
+      - ./target-web/index.html:/usr/share/nginx/html/index.html:ro
+      - ./target-web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      lynjax.lab: "true"
+      lynjax.role: "target-web"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  target-metadata:
+    image: python:3.12-alpine
+    container_name: lynjax-target-metadata
+    working_dir: /srv/lynjax-metadata
+    command: ["python", "-m", "http.server", "8000"]
+    ports:
+      - "127.0.0.1:18081:8000"
+    volumes:
+      - ./target-metadata:/srv/lynjax-metadata:ro
+    labels:
+      lynjax.lab: "true"
+      lynjax.role: "target-metadata"
+    healthcheck:
+      test: ["CMD-SHELL", "python - <<'PY'\nfrom urllib.request import urlopen\nurlopen('http://127.0.0.1:8000/metadata.json', timeout=2).read()\nPY"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

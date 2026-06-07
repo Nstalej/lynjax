@@ -1,0 +1,22 @@
+{
+  "checks": [
+    {
+      "id": "http_status",
+      "description": "Verify that the target responds with the expected HTTP status code.",
+      "severity_if_failed": "medium",
+      "safe_by_default": true
+    },
+    {
+      "id": "http_header_capture",
+      "description": "Capture non-sensitive response headers for evidence.",
+      "severity_if_failed": "low",
+      "safe_by_default": true
+    },
+    {
+      "id": "metadata_fixture_parse",
+      "description": "Fetch and parse metadata JSON from the fixture service.",
+      "severity_if_failed": "low",
+      "safe_by_default": true
+    }
+  ]
+}

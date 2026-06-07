@@ -1,0 +1,36 @@
+name: Lab CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lab/**"
+      - "scripts/lab_*.sh"
+      - ".github/workflows/lab-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "lab/**"
+      - "scripts/lab_*.sh"
+      - ".github/workflows/lab-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  lab-checks:
+    name: Local lab baseline
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate lab fixtures and compose config
+        run: bash scripts/lab_validate.sh
+
+      - name: Smoke test local lab targets
+        timeout-minutes: 10
+        run: bash scripts/lab_smoke.sh

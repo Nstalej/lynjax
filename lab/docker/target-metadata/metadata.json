@@ -1,0 +1,8 @@
+{
+  "service": "target-metadata",
+  "lab": "lynjax-local-lab",
+  "version": "0.1.0",
+  "purpose": "Static JSON fixture for Lynjax beta checks",
+  "safe_to_probe": true,
+  "expected_checks": ["http_status", "metadata_fixture_parse"]
+}

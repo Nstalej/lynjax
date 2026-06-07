@@ -6,8 +6,9 @@
 
 - Ruta de trabajo inspeccionada: `C:\Users\nesal\Documents\001_Programas\netvault-rebrand-lab`.
 - Contenido existente antes de Lynjax: documentos de branding y `brand-kit-minimum/`.
-- Repositorio Git: no se encontró `.git` en `netvault-rebrand-lab`; no se inicializó remoto.
-- Decisión: crear `lynjax/` como base limpia y tratar NetVault/brand-kit existente como referencia histórica, no como migración automática.
+- Repositorio Git: `lynjax/` ya está inicializado y conectado a `Nstalej/lynjax` en GitHub público.
+- CI base: backend, frontend y lab tienen workflows separados.
+- Decisión: tratar NetVault/brand-kit existente como referencia histórica, no como migración automática.
 
 ## Día 1 — Base limpia de producto y marca
 
@@ -60,12 +61,15 @@
 
 **Resultado esperado:** Una demo puede producir un reporte de assessment sanitizado.
 
+**Preparación adelantada:** El lab local Docker ya cuenta con targets HTTP seguros, fixtures de scope/targets/checks y scripts `lab_validate`, `lab_up`, `lab_smoke` y `lab_down` para que Día 4 pueda enfocarse en consumir esos datos y producir evidencia/reportes.
+
 ## Día 5 — Integración, CI y paquete beta 0.5
 
 **Objetivo:** Dejar la beta lista para iterar y mostrar.
 
 - Unificar comandos de setup y smoke en `scripts/`.
 - Completar GitHub Actions para backend/frontend/docs.
+- Validar que el lab local sube con Docker Compose y que los endpoints fixture responden.
 - Añadir decisiones técnicas en `docs/`.
 - Pulir README con instrucciones reales.
 - Crear checklist beta 0.5.
@@ -76,7 +80,6 @@
 ## Open Risks
 
 - Aún no existe implementación real de backend ni frontend.
-- Los comandos del README son previstos, no verificados todavía.
-- No hay repositorio Git inicializado en `netvault-rebrand-lab` según la inspección de Día 1.
+- Docker no está disponible en el shell local actual de Hermes; el lab queda preparado y validado sintácticamente, pero `docker compose up` debe probarse en una máquina con Docker.
 - La disponibilidad de nombre/dominio/trademark de Lynjax debe tratarse como provisional hasta verificación externa.
 - Migrar código NetVault sin smoke checks previos puede reintroducir deuda; debe hacerse de forma selectiva.

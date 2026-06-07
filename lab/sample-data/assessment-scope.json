@@ -1,0 +1,25 @@
+{
+  "assessment_id": "demo-local-lab-001",
+  "name": "Lynjax Local Demo Lab",
+  "authorization": {
+    "mode": "local-demo-only",
+    "approved_by": "lab-fixture",
+    "notes": "Synthetic scope for local Docker Compose targets. Do not use for real networks."
+  },
+  "allowed_targets": [
+    "target-web",
+    "target-metadata",
+    "localhost:18080",
+    "localhost:18081"
+  ],
+  "disallowed_targets": [
+    "0.0.0.0/0",
+    "public-internet",
+    "client-networks"
+  ],
+  "evidence_policy": {
+    "store_sensitive_data": false,
+    "sanitize_outputs": true,
+    "retention": "demo-session-only"
+  }
+}
