@@ -38,6 +38,9 @@ Lynjax beta 0.5 queda con un ambiente local ejecutable para demo técnica: backe
 - `docs/TECHNICAL_MANUAL.md`: operación técnica de backend, frontend, lab, CI y troubleshooting.
 - `docs/LOCAL_TEST_ENVIRONMENT.md`: pasos exactos para instalar, arrancar, verificar y apagar el ambiente local.
 - `docs/VIRTUALIZED_ENVIRONMENTS.md`: ruta WSL2/VM/CI y Compose beta para app + lab.
+- `docs/manual/latex/lynjax-beta-0.5-manual.tex`: manual LaTeX con capturas virtuales.
+- `docs/manual/lynjax-beta-0.5-manual.pdf`: versión PDF generada desde LaTeX.
+- `docs/manual/assets/screenshots/`: capturas virtuales de frontend y backend.
 
 ### Virtualización — `virtualization/`
 

@@ -146,6 +146,7 @@ bash scripts/smoke-local.sh
 - Ambiente local: `docs/LOCAL_TEST_ENVIRONMENT.md`
 - Virtualización: `docs/VIRTUALIZED_ENVIRONMENTS.md`
 - Estado beta: `docs/BETA_0_5_STATUS.md`
+- LaTeX/PDF con capturas virtuales: `docs/manual/latex/lynjax-beta-0.5-manual.tex` y `docs/manual/lynjax-beta-0.5-manual.pdf`
 
 ## Roadmap inmediato
 
