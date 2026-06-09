@@ -1,0 +1,48 @@
+name: lynjax-beta
+
+services:
+  lynjax-backend:
+    image: python:3.12-slim
+    container_name: lynjax-backend
+    working_dir: /workspace/backend
+    command: >
+      sh -c "python -m pip install --no-cache-dir -r requirements.txt &&
+             python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ../backend:/workspace/backend:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "python -c \"from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/health', timeout=2).read()\""]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  lynjax-frontend:
+    image: node:20-alpine
+    container_name: lynjax-frontend
+    working_dir: /workspace/frontend
+    command: >
+      sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - ../frontend:/workspace/frontend
+      - lynjax_frontend_node_modules:/workspace/frontend/node_modules
+    depends_on:
+      lynjax-backend:
+        condition: service_started
+
+  lynjax-target-web:
+    extends:
+      file: ../lab/docker/docker-compose.yml
+      service: target-web
+
+  lynjax-target-metadata:
+    extends:
+      file: ../lab/docker/docker-compose.yml
+      service: target-metadata
+
+volumes:
+  lynjax_frontend_node_modules:
