@@ -8,7 +8,16 @@ Alejandro reservó 2026-06-09 y 2026-06-10 para probar Lynjax beta 0.5. Este doc
 
 ## Alejandro's findings / hallazgos reportados
 
-- _Placeholder:_ No hay notas nuevas de Alejandro disponibles en el contexto de esta sesión cron.
+- Corrección 2026-06-11: sí existía feedback explícito de Alejandro del 2026-06-10 y debe tratarse como alcance aprobado para el siguiente sprint.
+- Alejandro pidió combinar el roadmap anterior con el nuevo enfoque de **Lynjax Platform Shell** y reestructurar los cron jobs restantes para apuntar a una versión **v1.0 test candidate** ejecutable en Day 5.
+- Prioridades reportadas por Alejandro:
+  - sistema de idiomas ES/EN;
+  - estructura visual moderna;
+  - sidebar/menú lateral animado y desplegable;
+  - frontend tipo plataforma SaaS modular;
+  - revisión selectiva de NetVault/NetBouled;
+  - módulos visuales para dispositivos, conectividad, Active Directory, MCP/LLM, reportes y roadmap;
+  - preparación para pruebas base en entorno virtual orientado a Containerlab.
 - Validación histórica documentada en `docs/BETA_0_5_STATUS.md`: backend tests, frontend build y smoke local pasaron durante preparación beta 0.5.
 
 ## Blockers / bloqueadores
