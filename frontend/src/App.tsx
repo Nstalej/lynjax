@@ -1,5 +1,5 @@
-import { LynjaxDashboard } from './pages/LynjaxDashboard';
+import { AppShell } from './layout/AppShell';
 
 export function App() {
-  return <LynjaxDashboard />;
+  return <AppShell />;
 }
