@@ -1,6 +1,6 @@
 # Lynjax Assessment Report
 
-> Plantilla técnica base para beta 0.5. No incluir credenciales, secretos, datos personales ni evidencia de clientes reales sin sanitización.
+> Plantilla técnica base para candidato v1.0. No incluir credenciales, secretos, datos personales ni evidencia de clientes reales sin sanitización. El flujo demo actual renderiza Markdown desde la respuesta estructurada de `/api/v1/assessments/connectivity-demo`.
 
 ## 1. Resumen Ejecutivo
 

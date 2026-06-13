@@ -1,15 +1,20 @@
-from app.schemas.assessments import HostConnectivityResult, SimulatedCheckResult
+from app.schemas.assessments import AssessmentTargetResult, StructuredCheckResult
 
 
 def build_simulated_connectivity_results(
     hosts: list[str], checks: list[str]
-) -> list[HostConnectivityResult]:
+) -> list[AssessmentTargetResult]:
     """Return deterministic demo results without opening sockets or scanning networks."""
     return [
-        HostConnectivityResult(
-            host=host,
+        AssessmentTargetResult(
+            target=host,
+            status="simulated-pass",
             checks=[
-                SimulatedCheckResult(name=check, status="simulated-pass")
+                StructuredCheckResult(
+                    name=check,
+                    status="simulated-pass",
+                    summary=f"{check} check simulated successfully for {host}",
+                )
                 for check in checks
             ],
         )
