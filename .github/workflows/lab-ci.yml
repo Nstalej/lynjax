@@ -5,13 +5,19 @@ on:
     branches: [main]
     paths:
       - "lab/**"
+      - "docs/lab/**"
+      - "virtualization/**"
       - "scripts/lab_*.sh"
+      - "scripts/host-probe.sh"
       - ".github/workflows/lab-ci.yml"
   pull_request:
     branches: [main]
     paths:
       - "lab/**"
+      - "docs/lab/**"
+      - "virtualization/**"
       - "scripts/lab_*.sh"
+      - "scripts/host-probe.sh"
       - ".github/workflows/lab-ci.yml"
   workflow_dispatch:
 
@@ -28,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate lab fixtures and compose config
+      - name: Validate lab fixtures and compose/containerlab prep artifacts
         run: bash scripts/lab_validate.sh
 
       - name: Smoke test local lab targets

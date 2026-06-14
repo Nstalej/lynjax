@@ -1,0 +1,24 @@
+name: lynjax-demo
+
+mgmt:
+  network: lynjax-clab-mgmt
+  ipv4-subnet: 172.20.40.0/24
+
+topology:
+  nodes:
+    lynjax-demo-client:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool:latest
+      labels:
+        lynjax.role: demo-client
+        lynjax.scope: sanitized-local-lab
+    lynjax-demo-target:
+      kind: linux
+      image: ghcr.io/srl-labs/network-multitool:latest
+      labels:
+        lynjax.role: demo-target
+        lynjax.scope: sanitized-local-lab
+  links:
+    - endpoints:
+        - lynjax-demo-client:eth1
+        - lynjax-demo-target:eth1

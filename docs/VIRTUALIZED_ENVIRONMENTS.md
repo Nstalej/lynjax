@@ -11,8 +11,9 @@ Orden recomendado:
 1. Validar en Git Bash/Windows con scripts locales.
 2. Ejecutar Docker/Compose dentro de WSL2 Ubuntu/Debian o VM Ubuntu.
 3. Usar una VM dedicada con snapshots si se requiere más aislamiento.
-4. Evaluar Containerlab después de estabilizar la beta local.
-5. Dejar GNS3/EVE-NG para una etapa posterior con recursos confirmados.
+4. Preparar Containerlab como artefacto estático/visual después de estabilizar la beta local.
+5. Ejecutar Containerlab solo dentro de WSL2 Ubuntu/Debian, VM Ubuntu o CI con Docker/Containerlab instalados de forma explícita.
+6. Dejar GNS3/EVE-NG para una etapa posterior con recursos confirmados.
 
 No se requiere instalar nada elevado desde estos scripts. Cualquier instalación de WSL2, Docker Desktop, VirtualBox, VMware, Hyper-V o cambios de BIOS requiere aprobación manual.
 
@@ -112,6 +113,45 @@ Workflows disponibles:
 - `.github/workflows/lab-ci.yml`.
 
 El lab CI ejecuta Docker Compose en runner Ubuntu y valida los targets locales.
+
+## Ambiente E — Containerlab preparado para inspección visual/Linux
+
+Uso: revisar una topología demo sanitizada y dejar lista la ruta para pruebas base dentro de un runtime Linux.
+
+Archivos:
+
+- `docs/lab/CONTAINERLAB_PREP.md`.
+- `virtualization/containerlab/README.md`.
+- `virtualization/containerlab/lynjax-demo.clab.yml`.
+
+Validación estática desde Git Bash/Windows o Linux:
+
+```bash
+bash scripts/lab_validate.sh
+```
+
+Inspección visual con VS Code:
+
+```bash
+code --list-extensions | grep -i '^srl-labs\.vscode-containerlab$'
+code virtualization/containerlab/lynjax-demo.clab.yml
+```
+
+Comandos futuros solo dentro de WSL2 Ubuntu/Debian, VM Ubuntu o CI con Docker/Containerlab instalado:
+
+```bash
+containerlab inspect --topo virtualization/containerlab/lynjax-demo.clab.yml || true
+sudo containerlab deploy --topo virtualization/containerlab/lynjax-demo.clab.yml
+sudo containerlab inspect --topo virtualization/containerlab/lynjax-demo.clab.yml
+sudo containerlab destroy --topo virtualization/containerlab/lynjax-demo.clab.yml --cleanup
+```
+
+Límites:
+
+- No usar credenciales reales.
+- No agregar IPs de clientes o públicas.
+- No escanear redes externas.
+- No desplegar desde Windows/Git Bash si Docker/Containerlab no existen dentro de una capa Linux aprobada.
 
 ## Compose beta
 

@@ -23,4 +23,18 @@ Apagar:
 bash run-beta-compose.sh down
 ```
 
-Más detalles: `../docs/VIRTUALIZED_ENVIRONMENTS.md`.
+Más detalles:
+
+- `../docs/VIRTUALIZED_ENVIRONMENTS.md`
+- `../docs/lab/CONTAINERLAB_PREP.md`
+- `containerlab/README.md`
+
+## Containerlab
+
+El subdirectorio `containerlab/` contiene una topología demo sanitizada para inspección visual y futura ejecución dentro de WSL2 Ubuntu/Debian, una VM Ubuntu o CI. No se debe desplegar desde Windows/Git Bash si Docker/Containerlab no están disponibles en una capa Linux aprobada.
+
+Validación estática desde la raíz del repo:
+
+```bash
+bash scripts/lab_validate.sh
+```
