@@ -1,0 +1,90 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\title{Lynjax v1.0-rc1 Manual\\Runnable Test Candidate Package}
+\author{Hermes Agent para Alejandro}
+\date{2026-06-15}
+\begin{document}
+\maketitle
+
+\section*{Estado}
+Lynjax v1.0-rc1 es un candidato tecnico de prueba, no la publicacion final v1.0. El objetivo es validar ejecucion local y base virtual/container-lab sin credenciales reales, sin escaneo externo y sin cambios de host.
+
+\section{Alcance}
+\begin{itemize}
+  \item Frontend React/Vite bilingue ES/EN con shell de plataforma, sidebar y topbar.
+  \item Backend FastAPI con health, metadata y endpoint /api/v1/assessments/connectivity-demo.
+  \item Flujo demo assessment a evidencia a reporte Markdown.
+  \item Docker Compose beta para WSL2/Ubuntu/VM/CI.
+  \item Topologia Containerlab sanitizada y validada estaticamente.
+\end{itemize}
+
+\section{Capturas generadas}
+Las capturas del frontend y backend fueron generadas y guardadas en:
+\begin{itemize}
+  \item docs/manual/assets/screenshots/lynjax-v1.0-rc1-frontend-overview.png
+  \item docs/manual/assets/screenshots/lynjax-v1.0-rc1-backend-openapi.png
+\end{itemize}
+
+\section{Comandos locales}
+\begin{verbatim}
+cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+python -m pytest backend/tests -v
+npm --prefix frontend install
+npm --prefix frontend run build
+bash -n scripts/*.sh virtualization/run-beta-compose.sh
+bash scripts/lab_validate.sh
+bash scripts/dev-start.sh
+bash scripts/smoke-local.sh
+bash scripts/dev-stop.sh
+\end{verbatim}
+
+\section{Comandos WSL2/Ubuntu con Docker}
+\begin{verbatim}
+cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+. /home/nstalej/.nvm/nvm.sh
+nvm use 24
+backend/.venv-wsl/bin/python -m pytest backend/tests -v
+npm --prefix frontend install
+npm --prefix frontend run build
+bash scripts/lab_validate.sh
+cd virtualization
+bash run-beta-compose.sh config
+bash run-beta-compose.sh up-detached
+curl -fsS http://127.0.0.1:8000/health
+curl -fsS http://127.0.0.1:5173/ >/dev/null
+curl -fsS http://127.0.0.1:18080/ >/dev/null
+curl -fsS http://127.0.0.1:18081/metadata.json >/dev/null
+bash run-beta-compose.sh down -v
+\end{verbatim}
+
+\section{Matriz de validacion}
+\begin{itemize}
+  \item Backend pytest: PASS, 5 tests en Windows y WSL2.
+  \item Frontend build: PASS, Vite build OK tras npm install.
+  \item Bash syntax: PASS.
+  \item Lab validate: PASS; Compose config OK en WSL2.
+  \item Local smoke: PASS.
+  \item Docker Compose smoke: PASS para backend, frontend, target web y metadata.
+  \item Containerlab runtime: SKIP; containerlab no instalado.
+  \item NPM audit: WARN; 2 high por Vite/esbuild, upgrade mayor diferido.
+\end{itemize}
+
+\section{Riesgos y limites}
+\begin{itemize}
+  \item No publicar v1.0 final sin aprobacion explicita.
+  \item Resolver o aceptar formalmente los hallazgos NPM antes de produccion.
+  \item Instalar/probar Containerlab solo dentro de WSL2/Ubuntu/VM aprobada.
+  \item Mantener alcance sandbox: sin credenciales reales ni redes externas.
+\end{itemize}
+
+\section{Proximos pasos manuales}
+\begin{enumerate}
+  \item Revisar navegacion y selector ES/EN.
+  \item Ejecutar la demo segura desde frontend y Swagger.
+  \item Repetir smoke WSL2/Compose.
+  \item Decidir si se etiqueta final v1.0 o si se abre rama de hardening Vite/Containerlab.
+\end{enumerate}
+
+\end{document}

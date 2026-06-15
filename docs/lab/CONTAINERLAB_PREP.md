@@ -178,10 +178,29 @@ docker network ls --filter 'name=clab'
 
 Do not run destructive Docker cleanup against unrelated Docker environments.
 
-## Limitations for Day 5
+## Day 5 v1.0-rc1 validation results
+
+Executed on 2026-06-15:
+
+- Git Bash/Windows:
+  - `python -m pytest backend/tests -v`: PASS, 5 tests.
+  - `npm --prefix frontend run build`: PASS after rehydrating Rollup optional dependency with `npm install`.
+  - `bash -n scripts/*.sh virtualization/run-beta-compose.sh`: PASS.
+  - `bash scripts/lab_validate.sh`: PASS; Docker Compose skipped because Docker CLI is missing in Git Bash/Windows PATH.
+  - `bash scripts/dev-start.sh && bash scripts/smoke-local.sh && bash scripts/dev-stop.sh`: PASS.
+- WSL2 Ubuntu:
+  - Docker and Docker Compose are available.
+  - `containerlab` is not installed.
+  - Python tests and frontend build passed.
+  - `bash scripts/lab_validate.sh`: PASS with Docker Compose config validation.
+  - `bash virtualization/run-beta-compose.sh up-detached`: PASS.
+  - HTTP smoke passed for `127.0.0.1:8000/health`, `127.0.0.1:5173/`, `127.0.0.1:18080/`, and `127.0.0.1:18081/metadata.json`.
+  - Stack was stopped with `bash virtualization/run-beta-compose.sh down -v`.
+
+## Limitations for v1.0-rc1
 
 - Current Git Bash/Windows host cannot run Compose/Containerlab because Docker CLI is missing.
-- WSL availability was detected, but a usable Ubuntu/Debian distro and Docker/Containerlab inside it were not confirmed.
+- WSL2 Ubuntu can run Docker/Compose, but Containerlab runtime is still missing.
 - The Containerlab topology is a sanitized static/demo topology, not a real customer network.
-- No external scans or real credentials are part of the v1.0 test candidate.
-- Day 5 should focus on local app validation, static lab validation, and runtime execution only inside an approved Linux sandbox/CI environment.
+- No external scans or real credentials are part of the v1.0-rc1 test candidate.
+- `npm audit --audit-level=high` reports 2 high findings in the Vite/esbuild chain; defer the breaking Vite 8 upgrade to a dedicated branch.

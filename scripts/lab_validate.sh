@@ -4,6 +4,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+PYTHON_BIN="${PYTHON_BIN:-python}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+  else
+    echo "python or python3 is required for JSON/topology validation." >&2
+    exit 1
+  fi
+fi
+
 required_files=(
   "lab/README.md"
   "lab/docker/docker-compose.yml"
@@ -29,7 +39,7 @@ for file in "${required_files[@]}"; do
   echo "OK file: $file"
 done
 
-python - <<'PY'
+"$PYTHON_BIN" - <<'PY'
 from pathlib import Path
 import json
 import re

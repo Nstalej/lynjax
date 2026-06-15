@@ -35,9 +35,14 @@ if command -v netstat >/dev/null 2>&1; then
   fi
 fi
 
-if ! command -v python >/dev/null 2>&1; then
-  echo "python is required to start the Lynjax backend." >&2
-  exit 1
+PYTHON_BIN="${PYTHON_BIN:-python}"
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+  else
+    echo "python or python3 is required to start the Lynjax backend." >&2
+    exit 1
+  fi
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
@@ -55,15 +60,18 @@ if [[ ! -d frontend ]]; then
   exit 1
 fi
 
-if [[ ! -d frontend/node_modules ]]; then
-  echo "Installing frontend dependencies..."
+if [[ "${LYNJAX_SKIP_NPM_INSTALL:-0}" != "1" ]]; then
+  echo "Ensuring frontend dependencies are installed for this OS..."
   npm --prefix frontend install
+elif [[ ! -d frontend/node_modules ]]; then
+  echo "frontend/node_modules is missing and LYNJAX_SKIP_NPM_INSTALL=1 was set." >&2
+  exit 1
 fi
 
 echo "Starting Lynjax backend on http://127.0.0.1:${BACKEND_PORT}"
 (
   cd backend
-  python -m uvicorn app.main:app --host 127.0.0.1 --port "$BACKEND_PORT"
+  "$PYTHON_BIN" -m uvicorn app.main:app --host 127.0.0.1 --port "$BACKEND_PORT"
 ) >"$LOG_DIR/backend.log" 2>&1 &
 echo $! > "$BACKEND_PID_FILE"
 

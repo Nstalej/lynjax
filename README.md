@@ -1,44 +1,37 @@
 # Lynjax
 
-**Lynjax — Intelligent Network Visibility** es la beta limpia derivada del rebrand de NetVault: una base para auditoría, assessment y trazabilidad de infraestructura de red real, empezando por un flujo seguro, local y verificable.
+**Lynjax — Intelligent Network Visibility** es la base limpia del rebrand de NetVault: una plataforma local/sandbox-first para convertir assessments de red en evidencia, reportes y una ruta de laboratorio virtual/container.
 
-> Estado actual: **beta 0.5 lista para pruebas locales** con backend FastAPI, frontend React/Vite, lab Docker Compose local, scripts de arranque/parada, smoke checks y manuales operativos.
+> Estado actual: **v1.0-rc1 listo para pruebas**. No es v1.0 final. El candidato ejecuta backend FastAPI, frontend React/Vite, flujo demo assessment→evidencia→reporte, smoke checks locales y stack Docker Compose en WSL2/Ubuntu con targets sanitizados.
 
-## Qué incluye esta beta
+## Qué incluye v1.0-rc1
 
-- **Backend (`backend/`)**: API FastAPI con health check, metadata de beta y endpoint demo de assessment simulado.
-- **Frontend (`frontend/`)**: dashboard React/Vite con identidad visual Lynjax.
-- **Lab (`lab/`)**: targets HTTP locales/sanitizados para pruebas repetibles sin tocar redes reales.
-- **Virtualización (`virtualization/`)**: Compose beta para levantar backend + frontend + lab desde un runtime Linux/Docker aislado.
-- **Documentación (`docs/`)**: manual de usuario, manual técnico, guía de pruebas locales y guía de ambientes virtualizados.
-- **Reportes (`reports/`)**: plantilla markdown inicial para reportes técnicos de assessment.
-- **Scripts (`scripts/`)**: arranque, parada, smoke checks, validación del lab y probe read-only del host.
-- **CI (`.github/workflows/`)**: checks de backend, frontend y lab.
+- **Backend (`backend/`)**: API FastAPI con health, metadata y endpoint demo seguro `POST /api/v1/assessments/connectivity-demo`.
+- **Frontend (`frontend/`)**: shell React/Vite bilingüe ES/EN con sidebar, topbar y módulos Lynjax.
+- **Flujo demo**: el frontend puede llamar al backend y renderizar datos estructurados + reporte Markdown.
+- **Lab (`lab/`)**: targets HTTP locales/sanitizados para pruebas repetibles.
+- **Virtualización (`virtualization/`)**: Docker Compose beta para WSL2/Ubuntu/VM/CI y topología Containerlab sanitizada.
+- **Documentación (`docs/`)**: manuales, estado v1.0-rc1, preparación de Containerlab y notas de release.
+- **Scripts (`scripts/`)**: arranque/parada, smoke checks, validación de lab y probe read-only del host.
+- **CI (`.github/workflows/`)**: checks de backend/frontend/lab.
 
 ## Límites de seguridad
 
-Esta versión es una **beta técnica de laboratorio**:
+Esta versión es una **release candidate técnica de laboratorio**:
 
 - No escanea redes externas.
 - No usa credenciales reales.
+- No instala Docker/WSL/Containerlab/Windows features.
 - No debe ejecutarse contra clientes sin autorización escrita.
-- El endpoint de assessment es simulado y devuelve evidencia demo.
-- Los targets del lab se publican solo en `127.0.0.1`.
+- AD/LLM aparecen como módulos planificados/read-only, no como integraciones activas.
+- Los targets del lab se publican solo en localhost.
 
-## Inicio rápido para pruebas de hoy
-
-Desde Git Bash/WSL en Windows:
+## Inicio rápido local — Windows/Git Bash
 
 ```bash
 cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
-
-# Backend dependencies
 python -m pip install -r backend/requirements.txt
-
-# Frontend dependencies
 npm --prefix frontend install
-
-# Levantar backend + frontend
 bash scripts/dev-start.sh
 ```
 
@@ -48,36 +41,40 @@ Abrir:
 - Backend health: `http://127.0.0.1:8000/health`
 - Backend docs/OpenAPI: `http://127.0.0.1:8000/docs`
 
-Verificar:
+Verificar y detener:
 
 ```bash
 bash scripts/smoke-local.sh
-```
-
-Detener:
-
-```bash
 bash scripts/dev-stop.sh
 ```
 
-## Ejecutar backend manualmente
+## Tests y validación base
 
 ```bash
-cd backend
-python -m venv .venv
-source .venv/Scripts/activate  # Git Bash en Windows
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+python -m pytest backend/tests -v
+npm --prefix frontend run build
+bash -n scripts/*.sh virtualization/run-beta-compose.sh
+bash scripts/lab_validate.sh
 ```
 
-Endpoints:
+## WSL2/Ubuntu + Docker Compose
 
-- `GET /health`
-- `GET /api/v1/info`
-- `POST /api/v1/assessments/connectivity-demo`
+Usar cuando Docker esté disponible dentro de WSL2/Ubuntu/VM/CI:
 
-Ejemplo:
+```bash
+cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+bash scripts/lab_validate.sh
+cd virtualization
+bash run-beta-compose.sh config
+bash run-beta-compose.sh up-detached
+curl -fsS http://127.0.0.1:8000/health
+curl -fsS http://127.0.0.1:5173/ >/dev/null
+curl -fsS http://127.0.0.1:18080/ >/dev/null
+curl -fsS http://127.0.0.1:18081/metadata.json >/dev/null
+bash run-beta-compose.sh down -v
+```
+
+## Endpoint demo
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/assessments/connectivity-demo \
@@ -85,73 +82,17 @@ curl -X POST http://127.0.0.1:8000/api/v1/assessments/connectivity-demo \
   -d '{"hosts":["target-web","target-metadata"],"checks":["http","dns"]}'
 ```
 
-## Ejecutar frontend manualmente
+## Manuales y release candidate
 
-```bash
-cd frontend
-npm install
-npm run dev -- --host 127.0.0.1 --port 5173
-```
-
-Build de producción:
-
-```bash
-npm --prefix frontend run build
-```
-
-## Lab local
-
-```bash
-bash scripts/lab_validate.sh
-bash scripts/lab_up.sh
-bash scripts/lab_smoke.sh
-bash scripts/lab_down.sh
-```
-
-Targets esperados:
-
-- `http://127.0.0.1:18080/`
-- `http://127.0.0.1:18081/metadata.json`
-
-## Ambiente virtualizado beta
-
-Para levantar app + lab desde Docker/Compose dentro de WSL2 o una VM Ubuntu:
-
-```bash
-bash scripts/host-probe.sh
-cd virtualization
-bash run-beta-compose.sh up
-```
-
-Ver detalles en `docs/VIRTUALIZED_ENVIRONMENTS.md`.
-
-## Tests y validación
-
-```bash
-python -m pytest backend/tests -v
-npm --prefix frontend run build
-bash scripts/lab_validate.sh
-```
-
-Smoke completo con servicios locales ya levantados:
-
-```bash
-bash scripts/smoke-local.sh
-```
-
-## Manuales
-
+- Estado v1.0-rc1: `docs/V1_0_STATUS.md`
+- Notas de release: `docs/releases/v1.0-rc1-release-notes.md`
 - Usuario/demo: `docs/USER_MANUAL.md`
 - Técnico/operación: `docs/TECHNICAL_MANUAL.md`
-- Ambiente local: `docs/LOCAL_TEST_ENVIRONMENT.md`
-- Virtualización: `docs/VIRTUALIZED_ENVIRONMENTS.md`
-- Estado beta: `docs/BETA_0_5_STATUS.md`
-- LaTeX/PDF con capturas virtuales: `docs/manual/latex/lynjax-beta-0.5-manual.tex` y `docs/manual/lynjax-beta-0.5-manual.pdf`
+- Preparación Containerlab: `docs/lab/CONTAINERLAB_PREP.md`
+- Manual LaTeX/PDF: `docs/manual/latex/lynjax-v1.0-manual.tex` y `docs/manual/lynjax-v1.0-manual.pdf`
 
-## Roadmap inmediato
+## Riesgos abiertos
 
-1. Conectar frontend al endpoint real `/api/v1/assessments/connectivity-demo`.
-2. Generar reporte markdown desde datos devueltos por la API.
-3. Añadir persistencia local mínima para ejecuciones/evidencias.
-4. Crear checklist de autorización/scope para beta de campo controlada.
-5. Agregar checks TCP/SSH seguros antes de SNMP o integraciones más invasivas.
+- `npm audit --audit-level=high` reporta 2 hallazgos high por `esbuild` vía Vite; no se aplicó upgrade forzado porque propone Vite 8/breaking.
+- Containerlab no está instalado en el WSL actual; la topología está validada estáticamente.
+- Publicar `v1.0` final requiere aprobación explícita de Alejandro.

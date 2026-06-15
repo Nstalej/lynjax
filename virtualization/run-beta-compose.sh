@@ -31,7 +31,7 @@ case "$ACTION" in
     docker compose -f "$COMPOSE_FILE" up --build "$@"
     ;;
   logs)
-    docker compose -f "$COMPOSE_FILE" logs -f "$@"
+    docker compose -f "$COMPOSE_FILE" logs "$@"
     ;;
   ps)
     docker compose -f "$COMPOSE_FILE" ps "$@"
