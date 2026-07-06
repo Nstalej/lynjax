@@ -2,6 +2,8 @@
 
 **Lynjax — Intelligent Network Visibility** es la base limpia del rebrand de NetVault: una plataforma local/sandbox-first para convertir assessments de red en evidencia, reportes y una ruta de laboratorio virtual/container.
 
+> Repositorio/carpeta canónica: `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax` (`git@github.com:Nstalej/lynjax.git`). La carpeta externa antigua `C:/Users/nesal/Documents/001_Programas/lynjax` fue archivada en `_archived_workspaces/lynjax-external-migrated-20260706`; no debe usarse para hardening/ECC, builds de frontend ni desarrollo.
+
 > Estado actual: **v1.0-rc1 listo para pruebas**. No es v1.0 final. El candidato ejecuta backend FastAPI, frontend React/Vite, flujo demo assessment→evidencia→reporte, smoke checks locales y stack Docker Compose en WSL2/Ubuntu con targets sanitizados.
 
 ## Qué incluye v1.0-rc1

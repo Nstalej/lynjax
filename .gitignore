@@ -55,6 +55,7 @@ reports/**/*.docx
 # Lab artifacts
 lab/.state/
 lab/tmp/
+virtualization/containerlab/clab-*/
 *.pcap
 *.pcapng
 

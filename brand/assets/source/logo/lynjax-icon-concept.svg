@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Lynjax icon concept</title>
+  <desc id="desc">A connected L and X network trace mark.</desc>
+  <defs>
+    <linearGradient id="g" x1="120" y1="96" x2="392" y2="416" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#083B5C"/>
+      <stop offset="0.52" stop-color="#0E7490"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#F2FAF8"/>
+  <rect x="74" y="74" width="364" height="364" rx="92" fill="white"/>
+  <path d="M164 128V350H286" stroke="url(#g)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M286 150L374 238L286 326" stroke="url(#g)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M374 150L286 238L374 326" stroke="url(#g)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <circle cx="164" cy="128" r="30" fill="#083B5C" stroke="white" stroke-width="12"/>
+  <circle cx="164" cy="350" r="30" fill="#0E7490" stroke="white" stroke-width="12"/>
+  <circle cx="286" cy="350" r="30" fill="#2DD4BF" stroke="white" stroke-width="12"/>
+  <circle cx="286" cy="238" r="24" fill="#0E7490" stroke="white" stroke-width="10"/>
+  <circle cx="374" cy="150" r="24" fill="#083B5C" stroke="white" stroke-width="10"/>
+  <circle cx="374" cy="326" r="24" fill="#2DD4BF" stroke="white" stroke-width="10"/>
+</svg>
