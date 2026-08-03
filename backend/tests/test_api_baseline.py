@@ -13,14 +13,14 @@ def test_health_reports_ok_status():
     assert response.json() == {"status": "ok"}
 
 
-def test_info_reports_v1_rc_backend_metadata():
+def test_info_reports_backend_metadata():
     response = client.get("/api/v1/info")
 
     assert response.status_code == 200
     assert response.json() == {
-        "name": "Lynjax Backend",
-        "version": "1.0.0-rc1",
-        "environment": "beta-test",
+        "name": "Lynjax",
+        "version": "0.6.0-dev",
+        "environment": "development",
         "network_policy": "simulated-checks-only",
     }
 
