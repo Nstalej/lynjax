@@ -31,38 +31,22 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install backend dependencies when available
+      - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest ruff
-          if [ -f backend/requirements.txt ]; then
-            python -m pip install -r backend/requirements.txt
-          elif [ -f backend/pyproject.toml ]; then
-            python -m pip install -e backend || python -m pip install -e 'backend[dev]'
-          else
-            echo "No backend/requirements.txt or backend/pyproject.toml yet; running structural checks only."
-          fi
+          # requirements-dev pulls in requirements plus pytest, pytest-asyncio
+          # and ruff. Installing bare pytest here would skip pytest-asyncio and
+          # every async test would error at collection.
+          python -m pip install -r backend/requirements-dev.txt
 
-      - name: Lint Python files when present
-        run: |
-          if find backend -name '*.py' -print -quit | grep -q .; then
-            ruff check backend
-          else
-            echo "No Python files in backend yet; lint skipped."
-          fi
+      - name: Lint
+        run: ruff check backend
 
-      - name: Compile Python files when present
-        run: |
-          if find backend -name '*.py' -print -quit | grep -q .; then
-            python -m compileall backend
-          else
-            echo "No Python files in backend yet; compile skipped."
-          fi
+      - name: Compile
+        run: python -m compileall -q backend/app backend/tests
 
-      - name: Run backend tests when present
-        run: |
-          if find backend/tests -type f \( -name 'test_*.py' -o -name '*_test.py' \) -print -quit | grep -q .; then
-            pytest backend/tests -v
-          else
-            echo "No backend tests yet; pytest skipped."
-          fi
+      - name: Run backend tests
+        # Run from backend/ so pytest.ini applies; it sets asyncio_mode=auto,
+        # without which the async tests are collected but never awaited.
+        working-directory: backend
+        run: pytest -v
