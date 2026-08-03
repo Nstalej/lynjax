@@ -56,7 +56,7 @@ Uso: ejecutar Compose dentro de Linux, con repo montado desde `/mnt/c/...` o clo
 Comandos esperados dentro de WSL:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/host-probe.sh
 cd virtualization
 bash run-beta-compose.sh up

@@ -6,7 +6,7 @@
 ## Sources inspected
 
 - Legacy repo: `C:/Users/nesal/Documents/001_Programas/netvault`
-- Current Lynjax repo: `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax`
+- Current Lynjax repo: `C:/Users/nesal/Documents/001_Programas/lynjax`
 - Word roadmaps:
   - `C:/Users/nesal/Documents/002-Obsidian-Vault/01 - Proyectos/Network Monitor/NetVault_Roadmap_2025-2026.docx`
   - `C:/Users/nesal/Documents/002-Obsidian-Vault/01 - Proyectos/Network Monitor/NetVault_Roadmap_v2_i18n_AI.docx`

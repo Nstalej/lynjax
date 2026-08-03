@@ -71,7 +71,7 @@ Use when Alejandro approves or confirms an existing WSL2 Linux distro with Docke
 Expected commands inside WSL, not elevated Windows:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/host-probe.sh
 bash -n scripts/*.sh virtualization/run-beta-compose.sh
 bash scripts/lab_validate.sh
@@ -95,7 +95,7 @@ Expected localhost checks from Windows/browser after Compose starts:
 Containerlab static artifact validation/deploy path inside Linux runtime:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/lab_validate.sh
 containerlab inspect --topo virtualization/containerlab/lynjax-demo.clab.yml || true
 

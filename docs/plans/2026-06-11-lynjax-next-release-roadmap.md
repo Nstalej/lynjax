@@ -31,7 +31,7 @@ For this five-day sprint, target **v0.6 release candidate** unless Alejandro's b
 
 ## Current Baseline
 
-Repository: `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax`
+Repository: `C:/Users/nesal/Documents/001_Programas/lynjax`
 
 Remote: `git@github.com:Nstalej/lynjax.git`
 

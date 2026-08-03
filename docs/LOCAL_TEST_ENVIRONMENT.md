@@ -24,14 +24,14 @@ reports/   # plantillas y salidas de assessment
 Desde la raíz del proyecto:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 python -m pip install -r backend/requirements.txt
 ```
 
 O con venv aislado:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/backend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/backend
 python -m venv .venv
 source .venv/Scripts/activate
 python -m pip install --upgrade pip
@@ -41,7 +41,7 @@ python -m pip install -r requirements.txt
 ## 2. Instalar dependencias del frontend
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/frontend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/frontend
 npm install
 ```
 
@@ -50,7 +50,7 @@ npm install
 Desde la raíz:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/dev-start.sh
 ```
 
@@ -78,14 +78,14 @@ bash scripts/dev-stop.sh
 Backend:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/backend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/backend
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Frontend en otra terminal:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/frontend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/frontend
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
@@ -94,7 +94,7 @@ npm run dev -- --host 127.0.0.1 --port 5173
 Con backend y frontend ya levantados:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/smoke-local.sh
 ```
 
@@ -119,7 +119,7 @@ Resultado esperado:
 El lab Docker expone targets seguros/locales para demo de red sin tocar redes reales:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/lab_validate.sh
 bash scripts/lab_up.sh
 bash scripts/lab_smoke.sh

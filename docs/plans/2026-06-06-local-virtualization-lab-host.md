@@ -12,7 +12,7 @@
 
 ## Current Baseline — 2026-06-06/07
 
-**Repository:** `C:\Users\nesal\Documents\001_Programas\netvault-rebrand-lab\lynjax`
+**Repository:** `C:\Users\nesal\Documents\001_Programas\lynjax`
 
 **GitHub:** `https://github.com/Nstalej/lynjax`
 

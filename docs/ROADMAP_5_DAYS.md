@@ -4,7 +4,7 @@
 
 ## Current Baseline
 
-- Ruta de trabajo inspeccionada: `C:\Users\nesal\Documents\001_Programas\netvault-rebrand-lab`.
+- Ruta de trabajo inspeccionada: `C:\Users\nesal\Documents\001_Programasynjax`.
 - Contenido existente antes de Lynjax: documentos de branding y `brand-kit-minimum/`.
 - Repositorio Git: `lynjax/` ya está inicializado y conectado a `Nstalej/lynjax` en GitHub público.
 - CI base: backend, frontend y lab tienen workflows separados.

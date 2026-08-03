@@ -1,4 +1,4 @@
-> **Migration note:** This is the original Beta 0.5 foundation plan migrated from the obsolete external `C:/Users/nesal/Documents/001_Programas/lynjax` workspace. Use `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax` as the canonical repository. Some baseline/open-risk statements are historical and are superseded by the v1.0-rc1 docs.
+> **Migration note:** This is the original Beta 0.5 foundation plan migrated from the obsolete external `C:/Users/nesal/Documents/001_Programas/lynjax` workspace. Use `C:/Users/nesal/Documents/001_Programas/lynjax` as the canonical repository. Some baseline/open-risk statements are historical and are superseded by the v1.0-rc1 docs.
 
 # Lynjax Beta 0.5 Foundation Implementation Plan
 
@@ -15,7 +15,7 @@
 ## Current Baseline — 2026-05-30
 
 **Historical workspace:** `C:/Users/nesal/Documents/001_Programas/lynjax` (migrated)
-**Canonical workspace:** `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax`
+**Canonical workspace:** `C:/Users/nesal/Documents/001_Programas/lynjax`
 
 **Decisions made:**
 
@@ -81,7 +81,7 @@ Lynjax beta 0.5 foundation is ready when:
 **Commands:**
 
 ```bash
-cd C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd C:/Users/nesal/Documents/001_Programas/lynjax
 git status --short --branch
 git add DESIGN.md docs/branding/brand-brief.md brand/assets/source/logo docs/plans/2026-05-30-lynjax-beta-0.5-foundation.md
 git commit -m "docs: migrate lynjax brand foundation into canonical repo"

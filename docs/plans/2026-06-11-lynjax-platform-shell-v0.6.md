@@ -14,7 +14,7 @@
 
 ## Current Baseline
 
-Repository: `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax`
+Repository: `C:/Users/nesal/Documents/001_Programas/lynjax`
 
 Current Lynjax beta 0.5 contains:
 
@@ -316,7 +316,7 @@ The v0.6 Platform Shell is acceptable when:
 ## First command sequence for Day 1
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 git status --short --branch
 python -m pytest backend/tests -v
 npm --prefix frontend run build

@@ -122,7 +122,7 @@ bash scripts/dev-stop.sh
 Validado en WSL2 Ubuntu con Docker/Compose disponibles:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 . /home/nstalej/.nvm/nvm.sh
 nvm use 24
 backend/.venv-wsl/bin/python -m pytest backend/tests -v

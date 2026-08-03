@@ -2,9 +2,17 @@
 
 **Lynjax — Intelligent Network Visibility** es la base limpia del rebrand de NetVault: una plataforma local/sandbox-first para convertir assessments de red en evidencia, reportes y una ruta de laboratorio virtual/container.
 
-> Repositorio/carpeta canónica: `C:/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax` (`git@github.com:Nstalej/lynjax.git`). La carpeta externa antigua `C:/Users/nesal/Documents/001_Programas/lynjax` fue archivada en `_archived_workspaces/lynjax-external-migrated-20260706`; no debe usarse para hardening/ECC, builds de frontend ni desarrollo.
+> Repositorio/carpeta canónica: `C:/Users/nesal/Documents/001_Programas/lynjax` (`git@github.com:Nstalej/lynjax.git`).
+> Workspaces anteriores, todos retirados y no utilizables para desarrollo:
+> - `001_Programas/netvault-rebrand-lab/lynjax` — envoltorio previo, retirado el 2026-07-31.
+> - `001_Programas/lynjax` (versión de julio) — archivada en `_archived_workspaces/lynjax-external-migrated-20260706`.
+> - `001_Programas/netvault` — línea original, respaldada en `_archived_workspaces/netvault-final-20260731`; su repo quedó archivado en GitHub.
 
-> Estado actual: **v1.0-rc1 listo para pruebas**. No es v1.0 final. El candidato ejecuta backend FastAPI, frontend React/Vite, flujo demo assessment→evidencia→reporte, smoke checks locales y stack Docker Compose en WSL2/Ubuntu con targets sanitizados.
+> Estado actual: **cáscara de plataforma con checks simulados.** El backend ejecuta FastAPI con un
+> endpoint demo seguro, el frontend React/Vite renderiza el flujo assessment→evidencia→reporte, y
+> existen smoke checks y stack Docker Compose. Los checks devuelven `simulated-pass`: **todavía no
+> hay conectividad real de red.** El motor validado (SNMP, SSH, REST, vault de credenciales, MCP,
+> agente de Windows AD) se migra desde NetVault según `docs/plans/`.
 
 ## Qué incluye v1.0-rc1
 
@@ -31,7 +39,7 @@ Esta versión es una **release candidate técnica de laboratorio**:
 ## Inicio rápido local — Windows/Git Bash
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 python -m pip install -r backend/requirements.txt
 npm --prefix frontend install
 bash scripts/dev-start.sh
@@ -64,7 +72,7 @@ bash scripts/lab_validate.sh
 Usar cuando Docker esté disponible dentro de WSL2/Ubuntu/VM/CI:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/lab_validate.sh
 cd virtualization
 bash run-beta-compose.sh config

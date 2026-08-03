@@ -25,7 +25,7 @@ Lynjax v1.0-rc1 es sandbox-first:
 Desde la raíz del repo:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 python -m pip install -r backend/requirements.txt
 npm --prefix frontend install
 bash scripts/dev-start.sh
@@ -94,7 +94,7 @@ Resultado esperado:
 Si Docker/Compose está disponible dentro de WSL2/Ubuntu/VM/CI:
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/lab_validate.sh
 cd virtualization
 bash run-beta-compose.sh up-detached

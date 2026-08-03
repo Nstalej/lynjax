@@ -39,7 +39,7 @@ Lynjax queda preparado como **v1.0-rc1**, no como v1.0 final. El candidato puede
 ### Validación local Windows/Git Bash
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 python -m pytest backend/tests -v
 npm --prefix frontend install
 npm --prefix frontend run build
@@ -53,7 +53,7 @@ bash scripts/dev-stop.sh
 ### Validación WSL2 Ubuntu con Docker
 
 ```bash
-cd /mnt/c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /mnt/c/Users/nesal/Documents/001_Programas/lynjax
 . /home/nstalej/.nvm/nvm.sh
 nvm use 24
 backend/.venv-wsl/bin/python -m pytest backend/tests -v

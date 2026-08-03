@@ -7,7 +7,7 @@ Este documento conecta la estructura local de Lynjax con GitHub sin crear el rem
 Ruta local:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 ```
 
 Si todavía no es repositorio Git local:
@@ -28,7 +28,7 @@ git status --short
 ## Validar si ya existe remoto
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 git remote -v
 ```
 
@@ -51,14 +51,14 @@ gh auth status
 Crear un repositorio privado recomendado para el rebrand:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 gh repo create Nstalej/lynjax --private --source=. --remote=origin --description "Lynjax rebrand lab: FastAPI + Vite baseline"
 ```
 
 Alternativa pública si Alejandro decide publicarlo:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 gh repo create Nstalej/lynjax --public --source=. --remote=origin --description "Lynjax rebrand lab: FastAPI + Vite baseline"
 ```
 
@@ -67,7 +67,7 @@ gh repo create Nstalej/lynjax --public --source=. --remote=origin --description 
 Si el repo ya fue creado en GitHub, conecta `origin` así:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 git remote add origin git@github.com:Nstalej/lynjax.git
 git remote -v
 git ls-remote --heads origin
@@ -76,7 +76,7 @@ git ls-remote --heads origin
 Si `origin` existe pero apunta a otra URL:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 git remote set-url origin git@github.com:Nstalej/lynjax.git
 git remote -v
 git ls-remote --heads origin
@@ -87,7 +87,7 @@ git ls-remote --heads origin
 Después de confirmar el remoto correcto:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 git add README.md .gitignore .github/workflows/backend-ci.yml .github/workflows/frontend-ci.yml docs/GITHUB_SETUP.md backend frontend docs brand reports lab scripts
 git commit -m "chore: add Lynjax GitHub CI baseline"
 git push -u origin main

@@ -53,35 +53,35 @@ Lynjax beta 0.5 queda con un ambiente local ejecutable para demo técnica: backe
 Comandos ejecutados durante Día 5 / preparación final de pruebas:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/host-probe.sh
 ```
 
 Resultado: probe read-only ejecutado; Python, Node, npm, curl, git, `wsl.exe` y `winget.exe` disponibles; Docker/VBox/Vagrant/Multipass/QEMU/GNS3 no disponibles desde Git Bash; virtualización firmware reportada como `False`; usuario no administrador.
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash -n scripts/host-probe.sh virtualization/run-beta-compose.sh
 ```
 
 Resultado: scripts shell válidos.
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 python -m pytest backend/tests -v
 ```
 
 Resultado: `3 passed`.
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/frontend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/frontend
 npm run build
 ```
 
 Resultado: build correcto con Vite; salida generada en `frontend/dist/`.
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax/backend
+cd /c/Users/nesal/Documents/001_Programas/lynjax/backend
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 curl -fsS http://127.0.0.1:8000/health
 ```
@@ -89,7 +89,7 @@ curl -fsS http://127.0.0.1:8000/health
 Resultado: `/health` respondió `{"status":"ok"}`.
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/dev-start.sh
 bash scripts/smoke-local.sh
 bash scripts/dev-stop.sh
@@ -102,7 +102,7 @@ Resultado: ambiente backend + frontend arrancó, smoke local pasó y los listene
 Arrancar todo:
 
 ```bash
-cd /c/Users/nesal/Documents/001_Programas/netvault-rebrand-lab/lynjax
+cd /c/Users/nesal/Documents/001_Programas/lynjax
 bash scripts/dev-start.sh
 ```
 
