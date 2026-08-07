@@ -21,3 +21,6 @@ httpx~=0.28.0
 
 # SSH connector
 paramiko~=3.5.0
+
+# SNMP connector
+pysnmp~=7.1.0
