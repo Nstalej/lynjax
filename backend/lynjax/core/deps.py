@@ -28,6 +28,19 @@ from lynjax.services.vault import CredentialVault
 _bearer = HTTPBearer(auto_error=False)
 
 
+def get_runtime_settings(request: Request) -> Settings:
+    """The settings the process is actually running with.
+
+    `get_settings()` returns the raw cached instance, whose secret fields are
+    still None; `ensure_runtime_secrets` resolves them into a *copy* that the
+    lifespan stores on app.state. Serving the raw one signed tokens with an
+    empty key, which surfaced as a 500 on login inside the container while the
+    tests passed, because their fixtures inject a secret explicitly.
+    """
+    resolved = getattr(request.app.state, "settings", None)
+    return resolved if resolved is not None else get_settings()
+
+
 def get_db(request: Request) -> Database:
     return request.app.state.db
 
@@ -47,7 +60,7 @@ def get_user_repository(db: Annotated[Database, Depends(get_db)]) -> UserReposit
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
     users: Annotated[UserRepository, Depends(get_user_repository)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    settings: Annotated[Settings, Depends(get_runtime_settings)],
 ) -> User:
     """Resolve the signed-in user, or refuse.
 
@@ -108,7 +121,7 @@ def require_role(minimum: Role):
     return guard
 
 
-SettingsDep = Annotated[Settings, Depends(get_settings)]
+SettingsDep = Annotated[Settings, Depends(get_runtime_settings)]
 DatabaseDep = Annotated[Database, Depends(get_db)]
 VaultDep = Annotated[CredentialVault, Depends(get_vault)]
 DeviceRepositoryDep = Annotated[DeviceRepository, Depends(get_device_repository)]

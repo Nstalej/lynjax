@@ -9,9 +9,9 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from lynjax.core.config import Settings, get_settings
+from lynjax.core.config import Settings
 from lynjax.core.database import Database
-from lynjax.core.deps import get_db, get_vault
+from lynjax.core.deps import get_db, get_runtime_settings, get_vault
 from lynjax.main import app
 from lynjax.services.connectors.base import (
     AuditCheck,
@@ -55,7 +55,7 @@ async def wired(tmp_path):
 
     app.dependency_overrides[get_db] = lambda: database
     app.dependency_overrides[get_vault] = lambda: vault
-    app.dependency_overrides[get_settings] = lambda: settings
+    app.dependency_overrides[get_runtime_settings] = lambda: settings
 
     with TestClient(app) as client:
         authenticate(client)
@@ -72,7 +72,7 @@ def client(wired):
 
 def allow_network(tmp_path):
     """Swap in settings that permit real network access."""
-    app.dependency_overrides[get_settings] = lambda: Settings(
+    app.dependency_overrides[get_runtime_settings] = lambda: Settings(
         data_dir=tmp_path,
         secret_key=SECRET,
         network_policy="authorized-targets",

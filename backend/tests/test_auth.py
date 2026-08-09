@@ -14,9 +14,9 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
-from lynjax.core.config import Settings, get_settings
+from lynjax.core.config import Settings
 from lynjax.core.database import Database
-from lynjax.core.deps import get_db, get_vault
+from lynjax.core.deps import get_db, get_runtime_settings, get_vault
 from lynjax.core.security import (
     InvalidTokenError,
     WeakPasswordError,
@@ -240,7 +240,7 @@ async def client(tmp_path):
 
     app.dependency_overrides[get_db] = lambda: database
     app.dependency_overrides[get_vault] = lambda: vault
-    app.dependency_overrides[get_settings] = lambda: settings
+    app.dependency_overrides[get_runtime_settings] = lambda: settings
 
     with TestClient(app) as test_client:
         yield test_client
@@ -445,3 +445,57 @@ class TestEveryRouteIsProtected:
         assert unprotected == [], (
             "These routes answered without authentication: " + ", ".join(unprotected)
         )
+
+
+class TestRealLifespanSigning:
+    """Runs the app through its own lifespan, with no injected secret.
+
+    Every other test in this file overrides the settings dependency with a
+    Settings that already carries a secret_key, which is exactly why they all
+    passed while login returned 500 inside the container: the dependency was
+    serving the raw cached settings, whose secret fields are still None, rather
+    than the copy `ensure_runtime_secrets` resolves and the lifespan stores.
+    """
+
+    def test_login_works_with_secrets_resolved_at_startup(self, tmp_path, monkeypatch):
+        import asyncio
+
+        from lynjax.core.config import get_settings as real_get_settings
+        from lynjax.core.database import Database as RealDatabase
+
+        monkeypatch.setenv("LYNJAX_DATA_DIR", str(tmp_path))
+        real_get_settings.cache_clear()
+        app.dependency_overrides.clear()
+
+        async def seed() -> None:
+            async with RealDatabase(tmp_path / "lynjax.db") as database:
+                await UserRepository(database).create(
+                    email="admin@lynjax.test",
+                    password=GOOD_PASSWORD,
+                    role="admin",
+                )
+
+        asyncio.run(seed())
+
+        try:
+            with TestClient(app) as client:
+                response = client.post(
+                    "/api/v1/auth/login",
+                    json={
+                        "email": "admin@lynjax.test",
+                        "password": GOOD_PASSWORD,
+                    },
+                )
+
+                assert response.status_code == 200, response.text
+                token = response.json()["access_token"]
+
+                # The token the server signed must also verify on the way back.
+                me = client.get(
+                    "/api/v1/auth/me",
+                    headers={"Authorization": f"Bearer {token}"},
+                )
+                assert me.status_code == 200
+                assert me.json()["email"] == "admin@lynjax.test"
+        finally:
+            real_get_settings.cache_clear()
