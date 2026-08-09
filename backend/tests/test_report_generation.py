@@ -44,5 +44,8 @@ def test_markdown_renderer_uses_structured_assessment_data():
     assert "# Lynjax Connectivity Demo Assessment" in markdown
     assert "Assessment ID: demo-connectivity-target-web" in markdown
     assert "- **Targets:** target-web" in markdown
-    assert "| target-web | http | simulated-pass | http check simulated successfully for target-web |" in markdown
+    assert (
+        "| target-web | http | simulated-pass | http check simulated successfully for target-web |"
+        in markdown
+    )
     assert "Demo/local assessment only." in markdown

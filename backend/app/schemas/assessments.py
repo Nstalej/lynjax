@@ -10,7 +10,9 @@ class InfoResponse(BaseModel):
 
 class ConnectivityAssessmentRequest(BaseModel):
     hosts: list[str] = Field(..., min_length=1, max_length=20)
-    checks: list[str] = Field(default_factory=lambda: ["http"], min_length=1, max_length=10)
+    checks: list[str] = Field(
+        default_factory=lambda: ["http"], min_length=1, max_length=10
+    )
 
 
 class StructuredCheckResult(BaseModel):

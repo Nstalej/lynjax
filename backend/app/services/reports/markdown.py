@@ -1,7 +1,9 @@
 from app.schemas.assessments import ConnectivityAssessmentResponse
 
 
-def render_connectivity_assessment_report(response: ConnectivityAssessmentResponse) -> str:
+def render_connectivity_assessment_report(
+    response: ConnectivityAssessmentResponse,
+) -> str:
     """Render a deterministic Markdown report from structured assessment data."""
     lines = [
         "# Lynjax Connectivity Demo Assessment",

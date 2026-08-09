@@ -102,6 +102,11 @@ def test_connectivity_demo_returns_structured_safe_assessment_report():
             ],
         },
     ]
-    assert payload["report_markdown"].startswith("# Lynjax Connectivity Demo Assessment")
-    assert "Assessment ID: demo-connectivity-target-web-target-metadata" in payload["report_markdown"]
+    assert payload["report_markdown"].startswith(
+        "# Lynjax Connectivity Demo Assessment"
+    )
+    assert (
+        "Assessment ID: demo-connectivity-target-web-target-metadata"
+        in payload["report_markdown"]
+    )
     assert "Safety Notice" in payload["report_markdown"]

@@ -290,11 +290,14 @@ class PySnmpTransport:
         if self._target is None:
             from pysnmp.hlapi.v3arch.asyncio import UdpTransportTarget
 
-            self._target = await UdpTransportTarget(
+            # pysnmp 7 exposes `create` as a classmethod taking the address.
+            # NetVault's spelling, UdpTransportTarget(addr, ...).create(),
+            # raises TypeError here because the address lands on `timeout`.
+            self._target = await UdpTransportTarget.create(
                 (self._host, self._port),
                 timeout=self._timeout,
                 retries=self._retries,
-            ).create()
+            )
         return self._target
 
     async def get(self, oid: str) -> Any | None:
@@ -319,10 +322,18 @@ class PySnmpTransport:
         return None
 
     async def walk(self, base_oid: str) -> list[WalkRow]:
-        from pysnmp.hlapi.v3arch.asyncio import ObjectIdentity, ObjectType, bulk_cmd
+        # bulk_walk_cmd is the async generator. `bulk_cmd`, which NetVault used
+        # here, is a coroutine for a single request in pysnmp 7, so iterating it
+        # raises "'async for' requires an object with __aiter__". Walks were
+        # broken as badly as the interface collection that called them.
+        from pysnmp.hlapi.v3arch.asyncio import (
+            ObjectIdentity,
+            ObjectType,
+            bulk_walk_cmd,
+        )
 
         rows: list[WalkRow] = []
-        iterator = bulk_cmd(
+        iterator = bulk_walk_cmd(
             self._engine,
             self._auth_data,
             await self._get_target(),
@@ -348,7 +359,17 @@ class PySnmpTransport:
         return rows
 
     async def close(self) -> None:
+        """Release the engine's transport dispatcher.
+
+        Without this pysnmp leaves a pending timeout task behind for every
+        engine, which accumulates in a long-running server. NetVault's
+        ``disconnect`` only flipped a boolean.
+        """
         self._target = None
+        try:
+            self._engine.close_dispatcher()
+        except Exception as exc:  # noqa: BLE001 - cleanup must never raise
+            logger.debug("Ignoring SNMP dispatcher shutdown error: %s", exc)
 
 
 def build_auth_data(credentials: dict[str, Any]) -> Any:

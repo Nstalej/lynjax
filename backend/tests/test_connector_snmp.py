@@ -508,6 +508,59 @@ class TestAudit:
         assert (await connector.run_audit()).timestamp.tzinfo is not None
 
 
+class TestRealTransport:
+    """Guards the pysnmp API surface, which has broken across major versions."""
+
+    async def test_the_transport_can_be_built_and_queried(self):
+        """NetVault's UdpTransportTarget(addr, ...).create() raises TypeError on
+        pysnmp 7: the address lands on the `timeout` parameter. Nothing caught
+        it because the transport was only ever exercised against real hardware.
+        Port 16100 has no agent, so this must return None, not raise."""
+        from app.services.connectors.snmp import PySnmpTransport
+
+        transport = PySnmpTransport(
+            "127.0.0.1",
+            16100,
+            build_auth_data({"version": "v2c", "community": "public"}),
+            timeout=0.3,
+            retries=0,
+        )
+
+        assert await transport.get("1.3.6.1.2.1.1.1.0") is None
+        await transport.close()
+
+    async def test_a_walk_against_a_silent_host_returns_no_rows(self):
+        from app.services.connectors.snmp import PySnmpTransport
+
+        transport = PySnmpTransport(
+            "127.0.0.1",
+            16100,
+            build_auth_data({"version": "v2c", "community": "public"}),
+            timeout=0.3,
+            retries=0,
+        )
+
+        assert await transport.walk("1.3.6.1.2.1.2.2.1.2") == []
+        await transport.close()
+
+    async def test_closing_releases_the_dispatcher(self):
+        """Otherwise pysnmp leaves a pending timeout task per engine."""
+        from app.services.connectors.snmp import PySnmpTransport
+
+        transport = PySnmpTransport(
+            "127.0.0.1",
+            16100,
+            build_auth_data({"version": "v2c", "community": "public"}),
+            timeout=0.3,
+            retries=0,
+        )
+        await transport.get("1.3.6.1.2.1.1.1.0")
+
+        await transport.close()
+
+        assert transport._target is None
+
+
 class TestRegistration:
     def test_the_connector_registers_itself_as_snmp(self):
         from app.services.connectors.base import get_connector
