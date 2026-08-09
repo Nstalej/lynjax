@@ -78,3 +78,6 @@ temp/
 # Keep workflow definitions tracked
 !.github/
 !.github/workflows/
+
+# Compiled frontend: built by CI and by the Docker image, not committed.
+frontend/dist/

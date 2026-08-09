@@ -20,6 +20,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException
 from starlette.responses import Response
 
 logger = logging.getLogger("lynjax.web")
@@ -53,7 +54,16 @@ class SinglePageApp(StaticFiles):
     """
 
     async def get_response(self, path: str, scope) -> Response:
-        response = await super().get_response(path, scope)
+        try:
+            response = await super().get_response(path, scope)
+        except HTTPException as exc:
+            # Starlette *raises* on a missing file rather than returning a 404
+            # response, so checking the status code alone never fires and a
+            # refresh on a client-side route would 404.
+            if exc.status_code != 404:
+                raise
+            return await super().get_response("index.html", scope)
+
         if response.status_code == 404:
             return await super().get_response("index.html", scope)
         return response

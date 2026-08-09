@@ -1,31 +1,217 @@
-import type { ConnectivityAssessmentResponse } from '../types/platform';
+/**
+ * Client for the Lynjax API.
+ *
+ * Requests are relative by default because FastAPI serves this bundle from the
+ * same origin, so there is no cross-origin setup to keep in sync and nothing to
+ * configure at deploy time. `VITE_LYNJAX_API_BASE_URL` exists only for `npm run
+ * dev`, where Vite serves on a different port.
+ */
 
-const API_BASE_URL = import.meta.env.VITE_LYNJAX_API_BASE_URL ?? 'http://127.0.0.1:8000';
+const API_BASE_URL = import.meta.env.VITE_LYNJAX_API_BASE_URL ?? '';
 
-type ConnectivityDemoRequest = {
-  hosts: string[];
-  checks: string[];
-};
+export class ApiError extends Error {
+  readonly status: number;
 
-export async function runConnectivityDemoAssessment(
-  payload: ConnectivityDemoRequest = {
-    hosts: ['target-web', 'target-metadata'],
-    checks: ['http', 'dns'],
-  },
-): Promise<ConnectivityAssessmentResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/assessments/connectivity-demo`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Connectivity demo failed with HTTP ${response.status}`);
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
   }
 
-  return response.json() as Promise<ConnectivityAssessmentResponse>;
+  /**
+   * True when the server refused because real network access is disabled.
+   * Distinct from a fault: the UI should explain the switch, not show an error.
+   */
+  get isPolicyRefusal(): boolean {
+    return this.status === 403;
+  }
 }
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      headers: { 'Content-Type': 'application/json' },
+      ...init,
+    });
+  } catch (cause) {
+    throw new ApiError(0, `No se pudo contactar la API: ${String(cause)}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    // FastAPI puts the message in `detail`, and for validation errors that is
+    // a list of objects rather than a string.
+    const detail = body?.detail;
+    const message =
+      typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((item: { msg?: string }) => item.msg ?? '').join('; ')
+          : `HTTP ${response.status}`;
+    throw new ApiError(response.status, message);
+  }
+
+  return body as T;
+}
+
+// ─── Types ───
+
+export type Device = {
+  id: number;
+  name: string;
+  host: string;
+  port: number;
+  connector_type: string;
+  device_type: string;
+  credential_name: string | null;
+  description: string | null;
+  is_active: boolean;
+  status: 'online' | 'offline' | 'warning' | 'unknown';
+  last_seen: string | null;
+};
+
+export type NewDevice = {
+  name: string;
+  host: string;
+  connector_type: 'ssh' | 'snmp' | 'rest';
+  device_type?: string;
+  port?: number | null;
+  credential_name?: string | null;
+  description?: string | null;
+};
+
+export type ConnectivityCheck = {
+  device_id: number;
+  device_name: string;
+  host: string;
+  reachable: boolean;
+  latency_ms: number | null;
+  error: string | null;
+};
+
+export type Finding = {
+  name: string;
+  status: 'pass' | 'warning' | 'fail';
+  message: string;
+  details?: Record<string, unknown> | null;
+};
+
+export type ChainHop = {
+  role: 'endpoint' | 'access' | 'transit' | 'edge' | 'unknown';
+  name: string;
+  host: string;
+  device_id: number | null;
+  port: string | null;
+  evidence: string;
+  findings: Finding[];
+};
+
+export type ChainTrace = {
+  target: string;
+  resolved_mac: string;
+  verdict: 'pass' | 'warning' | 'fail';
+  summary: string;
+  hops: ChainHop[];
+  findings: Finding[];
+};
+
+export type AuditResult = {
+  assessment_id: string;
+  client: string;
+  started_at: string;
+  verdict: 'pass' | 'warning' | 'fail';
+  summary: string;
+  devices_assessed: number;
+  unreachable: { device: string; reason: string }[];
+  findings: Finding[];
+  trace: ChainTrace | null;
+  report_url: string;
+};
+
+export type DiscoveredHost = {
+  ip: string;
+  hostname: string;
+  open_ports: number[];
+  device_hint: string;
+  banner: string;
+  already_registered: boolean;
+};
+
+export type DiscoveryJob = {
+  job_id: string;
+  status: 'running' | 'completed' | 'failed' | 'cancelled';
+  networks: string[];
+  methods: string[];
+  total_hosts: number;
+  scanned_hosts: number;
+  responding_hosts: number;
+  progress_percent: number;
+  started_at: string;
+  completed_at: string | null;
+  error: string | null;
+  results: DiscoveredHost[];
+};
+
+export type SystemInfo = {
+  name: string;
+  version: string;
+  environment: string;
+  network_policy: 'simulated-checks-only' | 'authorized-targets';
+};
+
+// ─── Calls ───
+
+export const api = {
+  info: () => request<SystemInfo>('/api/v1/info'),
+
+  listDevices: () => request<Device[]>('/api/v1/devices'),
+
+  createDevice: (device: NewDevice) =>
+    request<Device>('/api/v1/devices', {
+      method: 'POST',
+      body: JSON.stringify(device),
+    }),
+
+  deleteDevice: (id: number) =>
+    request<void>(`/api/v1/devices/${id}`, { method: 'DELETE' }),
+
+  checkDevice: (id: number) =>
+    request<ConnectivityCheck>(`/api/v1/devices/${id}/check`, { method: 'POST' }),
+
+  runAudit: (payload: { client?: string; trace_target?: string; locale?: string }) =>
+    request<AuditResult>('/api/v1/audit', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  trace: (targetIp: string) =>
+    request<ChainTrace>(`/api/v1/trace/${encodeURIComponent(targetIp)}`, {
+      method: 'POST',
+    }),
+
+  startDiscovery: (payload: {
+    subnets: string[];
+    methods?: string[];
+    max_hosts?: number;
+    allow_public?: boolean;
+    snmp_community?: string;
+  }) =>
+    request<DiscoveryJob>('/api/v1/discovery', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  getDiscoveryJob: (jobId: string) =>
+    request<DiscoveryJob>(`/api/v1/discovery/${jobId}`),
+
+  reportUrl: (assessmentId: string, format: 'md' | 'pdf') =>
+    `${API_BASE_URL}/api/v1/reports/${assessmentId}?fmt=${format}`,
+};
 
 export { API_BASE_URL };

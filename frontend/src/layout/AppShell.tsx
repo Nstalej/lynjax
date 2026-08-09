@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { navItems } from '../components/nav/navItems';
 import { useI18n } from '../i18n';
+import { AssetsPage } from '../pages/AssetsPage';
+import { AuditPage } from '../pages/AuditPage';
+import { DiscoveryPage } from '../pages/DiscoveryPage';
 import { ModulePage, OverviewPage } from '../pages/LynjaxDashboard';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
@@ -20,9 +23,17 @@ export function AppShell() {
     [activeModule],
   );
 
+  // Modules backed by the real API render their own page; the rest still show
+  // the placeholder panel, which is honest about what is not built yet.
   let content: ReactNode;
   if (activeItem.id === 'overview') {
     content = <OverviewPage onNavigate={setActiveModule} />;
+  } else if (activeItem.id === 'assets') {
+    content = <AssetsPage />;
+  } else if (activeItem.id === 'assessments' || activeItem.id === 'reports') {
+    content = <AuditPage />;
+  } else if (activeItem.id === 'connectivity') {
+    content = <DiscoveryPage />;
   } else {
     content = <ModulePage item={activeItem} />;
   }

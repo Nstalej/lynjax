@@ -5,9 +5,7 @@ import { ModulePanel } from '../components/ui/ModulePanel';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { StatusCard } from '../components/ui/StatusCard';
 import { useI18n } from '../i18n';
-import { API_BASE_URL, runConnectivityDemoAssessment } from '../lib/api';
 import { assets, evidenceRecords, moduleInsights, platformMetrics } from '../lib/mockData';
-import type { ConnectivityAssessmentResponse } from '../types/platform';
 
 export function OverviewPage({ onNavigate }: { onNavigate: (moduleId: string) => void }) {
   const { t } = useI18n();
@@ -94,16 +92,8 @@ export function ModulePage({ item }: { item: NavItem }) {
 
 function renderModuleContent(item: NavItem) {
   switch (item.id) {
-    case 'assets':
-      return <AssetsPage />;
-    case 'connectivity':
-      return <ConnectivityPage />;
-    case 'assessments':
-      return <AssessmentsPage />;
     case 'evidence':
       return <EvidencePage />;
-    case 'reports':
-      return <ReportsPage />;
     case 'topology':
       return <TopologyPage />;
     case 'directory':
@@ -125,50 +115,6 @@ function AssetsPage() {
           </dl>
         </ModulePanel>
       ))}
-    </div>
-  );
-}
-
-function ConnectivityPage() {
-  const [assessment, setAssessment] = useState<ConnectivityAssessmentResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function runDemo() {
-    setIsLoading(true);
-    setError(null);
-    try {
-      setAssessment(await runConnectivityDemoAssessment());
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : 'Error desconocido al ejecutar la demo');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <div className="module-stack">
-      <ModulePanel title="Safe connectivity assessment" eyebrow="Backend loop" status="ready" metadata={API_BASE_URL} body="Ejecuta una llamada local/sandbox a FastAPI. El backend no abre sockets ni escanea redes reales.">
-        <button className="button button--primary" disabled={isLoading} onClick={runDemo} type="button">
-          {isLoading ? 'Ejecutando…' : 'POST /api/v1/assessments/connectivity-demo'}
-        </button>
-        {error ? <p className="error-text">{error}</p> : null}
-      </ModulePanel>
-
-      {assessment ? <AssessmentResult assessment={assessment} /> : (
-        <EmptyState title="Sin resultados todavía" body="Ejecuta la demo para renderizar resultados estructurados y el preview Markdown devuelto por el backend." />
-      )}
-
-      <InsightPanels moduleId="connectivity" emptyTitle="Checks preparados" />
-    </div>
-  );
-}
-
-function AssessmentsPage() {
-  return (
-    <div className="module-stack">
-      <ConnectivityPage />
-      <InsightPanels moduleId="assessments" emptyTitle="Contrato de assessment" />
     </div>
   );
 }
@@ -231,55 +177,3 @@ function InsightPanels({ moduleId, emptyTitle }: { moduleId: string; emptyTitle:
   );
 }
 
-function AssessmentResult({ assessment }: { assessment: ConnectivityAssessmentResponse }) {
-  return (
-    <div className="assessment-result">
-      <ModulePanel title={assessment.assessment_id} eyebrow="Resultado backend" status="ready" metadata={assessment.overall_status}>
-        <dl className="compact-dl">
-          <div><dt>Creado</dt><dd>{assessment.created_at}</dd></div>
-          <div><dt>Modo</dt><dd>{assessment.mode}</dd></div>
-          <div><dt>Acceso red</dt><dd>{assessment.network_access}</dd></div>
-          <div><dt>Riesgo</dt><dd>{assessment.risk_level}</dd></div>
-          <div><dt>Evidencias</dt><dd>{assessment.evidence_summary.items_collected} ({assessment.evidence_summary.storage})</dd></div>
-        </dl>
-      </ModulePanel>
-
-      <div className="results-table-wrap">
-        <table className="results-table">
-          <thead>
-            <tr>
-              <th>Target</th>
-              <th>Check</th>
-              <th>Status</th>
-              <th>Resumen</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assessment.results.flatMap((result) =>
-              result.checks.map((check) => (
-                <tr key={`${result.target}-${check.name}`}>
-                  <td>{result.target}</td>
-                  <td>{check.name}</td>
-                  <td><StatusBadge tone="stable">{check.status}</StatusBadge></td>
-                  <td>{check.summary}</td>
-                </tr>
-              )),
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="report-preview">
-        <div className="module-panel__header">
-          <div>
-            <p className="eyebrow">Report preview</p>
-            <h3>Markdown devuelto</h3>
-          </div>
-          <StatusBadge tone="neutral">response-only</StatusBadge>
-        </div>
-        <pre>{assessment.report_markdown}</pre>
-        <p className="readonly-notice">{assessment.safety_notice}</p>
-      </div>
-    </div>
-  );
-}
