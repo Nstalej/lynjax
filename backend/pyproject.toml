@@ -35,7 +35,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# PDF is optional: the audit still produces Markdown without it, and keeping
+# the base install light matters for a tool meant to drop onto any laptop.
+pdf = ["reportlab~=4.2"]
 dev = [
+    "reportlab~=4.2",
     "pytest~=8.3.0",
     "pytest-asyncio~=0.24.0",
     "pytest-cov~=6.0.0",

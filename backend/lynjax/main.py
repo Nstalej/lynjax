@@ -7,6 +7,7 @@ from lynjax.api.routes.assessments import router as assessments_router
 from lynjax.api.routes.devices import router as devices_router
 from lynjax.api.routes.health import router as health_router
 from lynjax.api.routes.info import router as info_router
+from lynjax.api.routes.network import router as network_router
 from lynjax.core.config import ensure_runtime_secrets, get_settings
 from lynjax.core.database import Database
 from lynjax.services.vault import CredentialVault
@@ -56,6 +57,7 @@ app.include_router(health_router)
 app.include_router(info_router)
 app.include_router(assessments_router)
 app.include_router(devices_router)
+app.include_router(network_router)
 
 # Mounted last: the SPA claims "/" and would otherwise shadow the routers.
 mount_frontend(app)

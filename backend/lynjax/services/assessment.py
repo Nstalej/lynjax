@@ -25,7 +25,7 @@ from lynjax.services.audit import (
     run_network_audit,
     trace_chain,
 )
-from lynjax.services.connector_factory import build_connector
+from lynjax.services.connector_factory import assert_network_allowed, build_connector
 from lynjax.services.connectors.base import AuditCheck, ConnectorError, utc_now
 from lynjax.services.devices import DeviceRepository
 from lynjax.services.vault import CredentialVault
@@ -176,6 +176,11 @@ async def run_assessment(
     trace_target: str | None = None,
 ) -> Assessment:
     """Collect from every active device and analyse the result."""
+    # Checked up front, not left to emerge from the first connector build. An
+    # inventory with no devices would otherwise sail past the gate and return a
+    # clean assessment that never had permission to run.
+    assert_network_allowed(settings)
+
     started = utc_now()
     assessment = Assessment(
         assessment_id=f"assessment-{started.strftime('%Y%m%d-%H%M%S')}",
