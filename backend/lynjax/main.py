@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from lynjax.api.routes.assessments import router as assessments_router
+from lynjax.api.routes.auth import router as auth_router
 from lynjax.api.routes.devices import router as devices_router
 from lynjax.api.routes.health import router as health_router
 from lynjax.api.routes.info import router as info_router
@@ -70,6 +71,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(info_router)
 app.include_router(assessments_router)
 app.include_router(devices_router)

@@ -12,7 +12,13 @@ from dataclasses import asdict
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
-from lynjax.core.deps import DeviceRepositoryDep, SettingsDep, VaultDep
+from lynjax.core.deps import (
+    DeviceRepositoryDep,
+    OperatorDep,
+    SettingsDep,
+    VaultDep,
+    ViewerDep,
+)
 from lynjax.services.assessment import render_markdown, run_assessment
 from lynjax.services.audit import run_network_audit
 from lynjax.services.connector_factory import NetworkAccessDeniedError
@@ -58,7 +64,10 @@ def _deny(exc: NetworkAccessDeniedError) -> HTTPException:
 
 @router.post("/discovery", status_code=status.HTTP_202_ACCEPTED)
 async def start_discovery(
-    payload: DiscoveryRequest, repo: DeviceRepositoryDep, settings: SettingsDep
+    payload: DiscoveryRequest,
+    repo: DeviceRepositoryDep,
+    settings: SettingsDep,
+    _user: OperatorDep,
 ) -> dict:
     """Start a background scan of an authorised scope."""
     _discovery._repo = repo
@@ -83,12 +92,12 @@ async def start_discovery(
 
 
 @router.get("/discovery")
-async def list_discovery_jobs() -> list[dict]:
+async def list_discovery_jobs(_user: ViewerDep) -> list[dict]:
     return [summarise(job) for job in await _discovery.list_jobs()]
 
 
 @router.get("/discovery/{job_id}")
-async def get_discovery_job(job_id: str) -> dict:
+async def get_discovery_job(job_id: str, _user: ViewerDep) -> dict:
     job = await _discovery.get_job(job_id)
     if job is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No job {job_id!r}")
@@ -96,7 +105,7 @@ async def get_discovery_job(job_id: str) -> dict:
 
 
 @router.delete("/discovery/{job_id}", status_code=status.HTTP_202_ACCEPTED)
-async def cancel_discovery_job(job_id: str) -> dict:
+async def cancel_discovery_job(job_id: str, _user: OperatorDep) -> dict:
     if not await _discovery.cancel(job_id):
         raise HTTPException(
             status.HTTP_409_CONFLICT,
@@ -112,6 +121,7 @@ async def run_audit(
     repo: DeviceRepositoryDep,
     vault: VaultDep,
     settings: SettingsDep,
+    _user: OperatorDep,
 ) -> dict:
     """Collect from every active device, analyse, and keep the result.
 
@@ -179,6 +189,7 @@ def _trace_payload(trace) -> dict:
 async def download_report(
     assessment_id: str,
     request: Request,
+    _user: ViewerDep,
     fmt: str = Query(default="md", pattern="^(md|pdf)$"),
 ) -> Response:
     """Download a report produced by a previous audit."""
@@ -232,6 +243,7 @@ async def trace_endpoint(
     repo: DeviceRepositoryDep,
     vault: VaultDep,
     settings: SettingsDep,
+    _user: OperatorDep,
 ) -> dict:
     """Trace one endpoint from its access port out to the edge.
 
@@ -252,7 +264,10 @@ async def trace_endpoint(
 
 @router.get("/audit/findings")
 async def network_findings(
-    repo: DeviceRepositoryDep, vault: VaultDep, settings: SettingsDep
+    repo: DeviceRepositoryDep,
+    vault: VaultDep,
+    settings: SettingsDep,
+    _user: OperatorDep,
 ) -> list[CheckResponse]:
     """Cross-device findings only, without producing a report."""
     try:

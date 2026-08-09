@@ -9,6 +9,26 @@
 
 const API_BASE_URL = import.meta.env.VITE_LYNJAX_API_BASE_URL ?? '';
 
+const TOKEN_KEY = 'lynjax.token';
+
+/**
+ * Session token storage.
+ *
+ * sessionStorage, not localStorage: a field laptop is often shared, and a token
+ * that survives closing the browser is one more thing to remember to clear.
+ */
+export const session = {
+  get token(): string | null {
+    return sessionStorage.getItem(TOKEN_KEY);
+  },
+  set(token: string) {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  },
+  clear() {
+    sessionStorage.removeItem(TOKEN_KEY);
+  },
+};
+
 export class ApiError extends Error {
   readonly status: number;
 
@@ -23,16 +43,30 @@ export class ApiError extends Error {
    * Distinct from a fault: the UI should explain the switch, not show an error.
    */
   get isPolicyRefusal(): boolean {
-    return this.status === 403;
+    return this.status === 403 && /LYNJAX_NETWORK_POLICY|authorized-targets/.test(this.message);
+  }
+
+  /** The caller is signed in but lacks the role for this action. */
+  get isForbidden(): boolean {
+    return this.status === 403 && !this.isPolicyRefusal;
+  }
+
+  get isUnauthenticated(): boolean {
+    return this.status === 401;
   }
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
+    const token = session.token;
     response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json' },
       ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init?.headers,
+      },
     });
   } catch (cause) {
     throw new ApiError(0, `No se pudo contactar la API: ${String(cause)}`);
@@ -43,6 +77,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   const body = await response.json().catch(() => null);
+
+  if (response.status === 401) {
+    // The token expired or the account changed. Drop it so the app returns to
+    // the sign-in screen rather than retrying with something already rejected.
+    session.clear();
+  }
 
   if (!response.ok) {
     // FastAPI puts the message in `detail`, and for validation errors that is
@@ -167,8 +207,35 @@ export type SystemInfo = {
 
 // ─── Calls ───
 
+export type Account = {
+  id: number;
+  email: string;
+  role: 'admin' | 'operator' | 'viewer';
+  is_active: boolean;
+  full_name: string | null;
+};
+
+export type LoginResult = {
+  access_token: string;
+  email: string;
+  role: Account['role'];
+};
+
 export const api = {
   info: () => request<SystemInfo>('/api/v1/info'),
+
+  login: async (email: string, password: string): Promise<LoginResult> => {
+    const result = await request<LoginResult>('/api/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    session.set(result.access_token);
+    return result;
+  },
+
+  me: () => request<Account>('/api/v1/auth/me'),
+
+  logout: () => session.clear(),
 
   listDevices: () => request<Device[]>('/api/v1/devices'),
 
@@ -210,8 +277,33 @@ export const api = {
   getDiscoveryJob: (jobId: string) =>
     request<DiscoveryJob>(`/api/v1/discovery/${jobId}`),
 
-  reportUrl: (assessmentId: string, format: 'md' | 'pdf') =>
-    `${API_BASE_URL}/api/v1/reports/${assessmentId}?fmt=${format}`,
+  /**
+   * Download a report.
+   *
+   * Fetched rather than linked: an <a href> carries no Authorization header, so
+   * a plain link would 401 now that reports require a session.
+   */
+  downloadReport: async (assessmentId: string, format: 'md' | 'pdf') => {
+    const token = session.token;
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/reports/${assessmentId}?fmt=${format}`,
+      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+    );
+
+    if (!response.ok) {
+      throw new ApiError(response.status, `No se pudo descargar el informe.`);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${assessmentId}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  },
 };
 
 export { API_BASE_URL };

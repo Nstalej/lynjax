@@ -13,9 +13,12 @@ from lynjax.core.config import Settings, get_settings
 from lynjax.core.database import Database
 from lynjax.core.deps import get_db, get_vault
 from lynjax.main import app
+from lynjax.services.users import UserRepository
 from lynjax.services.vault import CredentialVault
 
 MASTER_KEY = "vLQ5wYAJc6qHhCUW3wRDGxQ0cWQFWpQxNKZbCKzE1yA="
+SECRET = "test-secret-key-for-signing-tokens-long-enough-for-hs256"
+ADMIN_PASSWORD = "correct-horse-battery"
 
 
 @pytest.fixture
@@ -23,12 +26,25 @@ async def client(tmp_path):
     database = Database(tmp_path / "network.db")
     await database.connect()
     vault = CredentialVault(database, MASTER_KEY)
+    await UserRepository(database).create(
+        email="admin@lynjax.test", password=ADMIN_PASSWORD, role="admin"
+    )
 
     app.dependency_overrides[get_db] = lambda: database
     app.dependency_overrides[get_vault] = lambda: vault
-    app.dependency_overrides[get_settings] = lambda: Settings(data_dir=tmp_path)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        data_dir=tmp_path, secret_key=SECRET
+    )
 
     with TestClient(app) as test_client:
+        response = test_client.post(
+            "/api/v1/auth/login",
+            json={"email": "admin@lynjax.test", "password": ADMIN_PASSWORD},
+        )
+        assert response.status_code == 200, response.text
+        test_client.headers.update(
+            {"Authorization": f"Bearer {response.json()['access_token']}"}
+        )
         yield test_client
 
     app.dependency_overrides.clear()
@@ -37,7 +53,9 @@ async def client(tmp_path):
 
 def allow_network(tmp_path):
     app.dependency_overrides[get_settings] = lambda: Settings(
-        data_dir=tmp_path, network_policy="authorized-targets"
+        data_dir=tmp_path,
+        secret_key=SECRET,
+        network_policy="authorized-targets",
     )
 
 

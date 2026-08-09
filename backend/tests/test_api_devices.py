@@ -18,9 +18,28 @@ from lynjax.services.connectors.base import (
     AuditResult,
     ConnectionTestResult,
 )
+from lynjax.services.users import UserRepository
 from lynjax.services.vault import CredentialVault
 
 MASTER_KEY = "vLQ5wYAJc6qHhCUW3wRDGxQ0cWQFWpQxNKZbCKzE1yA="
+SECRET = "test-secret-key-for-signing-tokens-long-enough-for-hs256"
+ADMIN_PASSWORD = "correct-horse-battery"
+
+
+def authenticate(client: TestClient) -> None:
+    """Sign in as the seeded admin and keep the token for every later call.
+
+    Every route requires a token now, so the fixtures carry one rather than each
+    test repeating the handshake.
+    """
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@lynjax.test", "password": ADMIN_PASSWORD},
+    )
+    assert response.status_code == 200, response.text
+    client.headers.update(
+        {"Authorization": f"Bearer {response.json()['access_token']}"}
+    )
 
 
 @pytest.fixture
@@ -29,13 +48,17 @@ async def wired(tmp_path):
     database = Database(tmp_path / "api.db")
     await database.connect()
     vault = CredentialVault(database, MASTER_KEY)
-    settings = Settings(data_dir=tmp_path)
+    settings = Settings(data_dir=tmp_path, secret_key=SECRET)
+    await UserRepository(database).create(
+        email="admin@lynjax.test", password=ADMIN_PASSWORD, role="admin"
+    )
 
     app.dependency_overrides[get_db] = lambda: database
     app.dependency_overrides[get_vault] = lambda: vault
     app.dependency_overrides[get_settings] = lambda: settings
 
     with TestClient(app) as client:
+        authenticate(client)
         yield client, database, vault
 
     app.dependency_overrides.clear()
@@ -50,7 +73,9 @@ def client(wired):
 def allow_network(tmp_path):
     """Swap in settings that permit real network access."""
     app.dependency_overrides[get_settings] = lambda: Settings(
-        data_dir=tmp_path, network_policy="authorized-targets"
+        data_dir=tmp_path,
+        secret_key=SECRET,
+        network_policy="authorized-targets",
     )
 
 

@@ -74,6 +74,23 @@ MIGRATIONS: tuple[tuple[int, str], ...] = (
         CREATE INDEX IF NOT EXISTS idx_devices_active ON devices(is_active);
         """,
     ),
+    (
+        3,
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            email           TEXT NOT NULL UNIQUE,
+            hashed_password TEXT NOT NULL,
+            full_name       TEXT,
+            role            TEXT NOT NULL DEFAULT 'viewer',
+            is_active       INTEGER NOT NULL DEFAULT 1,
+            created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at      TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+        """,
+    ),
 )
 
 

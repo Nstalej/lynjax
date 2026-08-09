@@ -30,6 +30,7 @@ from lynjax.core.config import (
 )
 from lynjax.core.database import Database
 from lynjax.services.devices import DeviceRepository
+from lynjax.services.users import UserRepository
 from lynjax.services.vault import CredentialVault
 
 
@@ -55,6 +56,7 @@ async def cmd_init(args: argparse.Namespace) -> int:
     database = await _open(settings)
     try:
         version = await database.get_schema_version()
+        accounts = await UserRepository(database).count()
     finally:
         await database.disconnect()
 
@@ -69,6 +71,10 @@ async def cmd_init(args: argparse.Namespace) -> int:
     print("Keys were generated on first run and are stored in the secrets file.")
     print("Back that file up: losing the master key makes stored credentials")
     print("unrecoverable.")
+    print()
+    if accounts == 0:
+        print("No accounts yet. Create the first administrator:")
+        print("    lynjax user you@example.com --admin")
     print()
     print("Next: `lynjax serve`")
     return 0
@@ -167,6 +173,55 @@ async def cmd_audit(args: argparse.Namespace) -> int:
         await database.disconnect()
 
 
+async def cmd_user(args: argparse.Namespace) -> int:
+    """Create an account. The only way to bootstrap the first administrator."""
+    import getpass
+
+    from lynjax.core.security import WeakPasswordError
+    from lynjax.services.users import UserError
+
+    settings = ensure_runtime_secrets(get_settings())
+    database = await _open(settings)
+
+    try:
+        users = UserRepository(database)
+        first = await users.count() == 0
+
+        if first and not args.admin:
+            print(
+                "This install has no accounts. The first one must be an "
+                "administrator: re-run with --admin.",
+                file=sys.stderr,
+            )
+            return 2
+
+        password = args.password
+        if not password:
+            # Prompted rather than passed as an argument, so it does not land in
+            # the shell history or the process list.
+            password = getpass.getpass("Password: ")
+            if password != getpass.getpass("Confirm password: "):
+                print("The passwords do not match.", file=sys.stderr)
+                return 2
+
+        try:
+            user = await users.create(
+                email=args.email,
+                password=password,
+                role="admin" if args.admin else args.role,
+            )
+        except (UserError, WeakPasswordError) as exc:
+            print(f"Could not create the account: {exc}", file=sys.stderr)
+            return 1
+    finally:
+        await database.disconnect()
+
+    print(f"Created {user.email} with role {user.role}.")
+    if first:
+        print("Sign in at /api/v1/auth/login.")
+    return 0
+
+
 async def cmd_purge(args: argparse.Namespace) -> int:
     """Remove client data after a visit."""
     settings = ensure_runtime_secrets(get_settings())
@@ -226,6 +281,20 @@ def build_parser() -> argparse.ArgumentParser:
     purge = subparsers.add_parser("purge", help="delete stored devices and credentials")
     purge.add_argument("--yes", action="store_true", help="confirm the deletion")
 
+    user = subparsers.add_parser("user", help="create an account")
+    user.add_argument("email", help="email address, used as the login")
+    user.add_argument("--admin", action="store_true", help="grant the admin role")
+    user.add_argument(
+        "--role",
+        default="viewer",
+        choices=["viewer", "operator", "admin"],
+        help="role when --admin is not given",
+    )
+    user.add_argument(
+        "--password",
+        help="password; prompted for when omitted, which keeps it out of shell history",
+    )
+
     return parser
 
 
@@ -237,6 +306,7 @@ def main(argv: list[str] | None = None) -> int:
         "info": cmd_info,
         "audit": cmd_audit,
         "purge": cmd_purge,
+        "user": cmd_user,
     }
 
     try:

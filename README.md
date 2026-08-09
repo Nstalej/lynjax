@@ -16,6 +16,13 @@ editarlo.
 
 Lynjax alcanza infraestructura real. Dos cosas antes de nada:
 
+**La API exige autenticación.** No hay modo anónimo ni interruptor para
+desactivarla: un interruptor así es exactamente lo que termina desplegado en un
+servidor por accidente. Crea la primera cuenta con `lynjax user ... --admin`.
+
+Los roles van de menor a mayor privilegio: **viewer** lee, **operator** además
+puede alcanzar la red del cliente, y **admin** además gestiona cuentas.
+
 **El acceso real a la red está apagado por defecto.** Ninguna operación que abra
 un socket funciona hasta que lo habilites explícitamente:
 
@@ -44,6 +51,7 @@ paquete Python, así que no hay servidor web aparte que configurar.
 ```bash
 pipx install lynjax
 lynjax init
+lynjax user tu@correo.com --admin
 lynjax serve
 ```
 
@@ -77,6 +85,7 @@ lynjax audit --client "Nombre del cliente" --out informe.pdf
 | Comando | Qué hace |
 |---|---|
 | `lynjax init` | Genera claves, crea la base de datos y muestra dónde queda todo |
+| `lynjax user <correo> --admin` | Crea una cuenta; obligatorio antes del primer inicio de sesión |
 | `lynjax serve` | Levanta la API y la interfaz en un puerto |
 | `lynjax audit` | Auditoría headless que escribe el informe |
 | `lynjax purge --yes` | Borra dispositivos y credenciales tras una visita |

@@ -13,7 +13,13 @@ from dataclasses import asdict
 
 from fastapi import APIRouter, HTTPException, Response, status
 
-from lynjax.core.deps import DeviceRepositoryDep, SettingsDep, VaultDep
+from lynjax.core.deps import (
+    DeviceRepositoryDep,
+    OperatorDep,
+    SettingsDep,
+    VaultDep,
+    ViewerDep,
+)
 from lynjax.schemas.devices import (
     AuditCheckResponse,
     ConnectivityCheckResponse,
@@ -55,14 +61,14 @@ def _to_response(device: Device) -> DeviceResponse:
 
 @router.get("", response_model=list[DeviceResponse])
 async def list_devices(
-    repo: DeviceRepositoryDep, active_only: bool = False
+    repo: DeviceRepositoryDep, _user: ViewerDep, active_only: bool = False
 ) -> list[DeviceResponse]:
     return [_to_response(device) for device in await repo.list(active_only=active_only)]
 
 
 @router.post("", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)
 async def create_device(
-    payload: DeviceCreateRequest, repo: DeviceRepositoryDep
+    payload: DeviceCreateRequest, repo: DeviceRepositoryDep, _user: OperatorDep
 ) -> DeviceResponse:
     try:
         device = await repo.create(**payload.model_dump())
@@ -72,7 +78,9 @@ async def create_device(
 
 
 @router.get("/{device_id}", response_model=DeviceResponse)
-async def get_device(device_id: int, repo: DeviceRepositoryDep) -> DeviceResponse:
+async def get_device(
+    device_id: int, repo: DeviceRepositoryDep, _user: ViewerDep
+) -> DeviceResponse:
     try:
         return _to_response(await repo.get(device_id))
     except DeviceNotFoundError as exc:
@@ -84,7 +92,9 @@ async def get_device(device_id: int, repo: DeviceRepositoryDep) -> DeviceRespons
     status_code=status.HTTP_204_NO_CONTENT,
     response_class=Response,
 )
-async def delete_device(device_id: int, repo: DeviceRepositoryDep) -> Response:
+async def delete_device(
+    device_id: int, repo: DeviceRepositoryDep, _user: OperatorDep
+) -> Response:
     try:
         await repo.delete(device_id)
     except DeviceNotFoundError as exc:
@@ -117,6 +127,7 @@ async def check_device(
     repo: DeviceRepositoryDep,
     vault: VaultDep,
     settings: SettingsDep,
+    _user: OperatorDep,
 ) -> ConnectivityCheckResponse:
     """Probe one device and record the resulting status."""
     device, connector = await _resolve_connector(device_id, repo, vault, settings)
@@ -146,6 +157,7 @@ async def audit_device(
     repo: DeviceRepositoryDep,
     vault: VaultDep,
     settings: SettingsDep,
+    _user: OperatorDep,
 ) -> DeviceAuditResponse:
     """Collect state from one device and return its checks."""
     device, connector = await _resolve_connector(device_id, repo, vault, settings)

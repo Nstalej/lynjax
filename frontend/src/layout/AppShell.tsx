@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { navItems } from '../components/nav/navItems';
+import type { Account } from '../lib/api';
 import { useI18n } from '../i18n';
 import { AssetsPage } from '../pages/AssetsPage';
 import { AuditPage } from '../pages/AuditPage';
@@ -8,7 +9,13 @@ import { ModulePage, OverviewPage } from '../pages/LynjaxDashboard';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
-export function AppShell() {
+export function AppShell({
+  account,
+  onSignOut,
+}: {
+  account: Account;
+  onSignOut: () => void;
+}) {
   const { language, t } = useI18n();
   const [activeModule, setActiveModule] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -51,7 +58,7 @@ export function AppShell() {
           onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
         />
         <div className="platform-shell__workspace">
-          <Topbar onOpenMobile={() => setMobileOpen(true)} />
+          <Topbar account={account} onOpenMobile={() => setMobileOpen(true)} onSignOut={onSignOut} />
           <main className="platform-main" id="main-content" tabIndex={-1}>
             {content}
           </main>

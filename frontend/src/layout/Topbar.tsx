@@ -1,7 +1,16 @@
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import type { Account } from '../lib/api';
 import { useI18n } from '../i18n';
 
-export function Topbar({ onOpenMobile }: { onOpenMobile: () => void }) {
+export function Topbar({
+  account,
+  onOpenMobile,
+  onSignOut,
+}: {
+  account: Account;
+  onOpenMobile: () => void;
+  onSignOut: () => void;
+}) {
   const { t } = useI18n();
 
   return (
@@ -18,6 +27,12 @@ export function Topbar({ onOpenMobile }: { onOpenMobile: () => void }) {
       <div className="topbar__actions">
         <span className="topbar__status">{t('topbar.status')}</span>
         <LanguageSwitcher />
+        <span className="topbar__account" title={`Rol: ${account.role}`}>
+          {account.email} · {account.role}
+        </span>
+        <button className="button button--ghost" onClick={onSignOut} type="button">
+          Salir
+        </button>
       </div>
     </header>
   );

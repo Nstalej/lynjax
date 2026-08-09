@@ -146,22 +146,20 @@ export function AuditPage() {
             <p>{result.summary}</p>
 
             <div className="audit-result__actions">
-              <a
+              <button
                 className="button button--secondary"
-                href={api.reportUrl(result.assessment_id, 'pdf')}
-                rel="noreferrer"
-                target="_blank"
+                onClick={() => void api.downloadReport(result.assessment_id, 'pdf')}
+                type="button"
               >
                 Descargar PDF
-              </a>
-              <a
+              </button>
+              <button
                 className="button button--ghost"
-                href={api.reportUrl(result.assessment_id, 'md')}
-                rel="noreferrer"
-                target="_blank"
+                onClick={() => void api.downloadReport(result.assessment_id, 'md')}
+                type="button"
               >
                 Descargar Markdown
-              </a>
+              </button>
             </div>
 
             <h3>Hallazgos</h3>
