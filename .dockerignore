@@ -1,0 +1,28 @@
+# Keep the build context small and reproducible. Without this the whole
+# backend/.venv and frontend/node_modules get shipped to the daemon, which is
+# slow and risks a stale virtualenv leaking into the image.
+**/.venv
+**/.venv-wsl
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+.git
+.github
+.dev-logs
+docs
+lab
+reports
+virtualization
+brand
+
+# Built by the image itself, in its own stage.
+frontend/dist
+
+# Never bake secrets or a developer's database into an image.
+**/*.db
+**/secrets.env
+**/.env
