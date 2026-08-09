@@ -24,3 +24,6 @@ paramiko~=3.5.0
 
 # SNMP connector
 pysnmp~=7.1.0
+
+# REST connector (Sophos XML profile)
+lxml~=5.3.0
