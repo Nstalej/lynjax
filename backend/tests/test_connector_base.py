@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import timezone
+import dataclasses
+from datetime import UTC
 
 import pytest
 
-from app.services.connectors import base
-from app.services.connectors.base import (
+from lynjax.services.connectors import base
+from lynjax.services.connectors.base import (
     AuditCheck,
     AuditResult,
     BaseConnector,
@@ -56,7 +57,7 @@ class TestTimestamps:
         assert utc_now().tzinfo is not None
 
     def test_utc_now_is_utc(self):
-        assert utc_now().utcoffset() == timezone.utc.utcoffset(None)
+        assert utc_now().utcoffset() == UTC.utcoffset(None)
 
     def test_audit_result_timestamp_defaults_to_aware_utc(self):
         assert AuditResult(device_name="dev").timestamp.tzinfo is not None
@@ -94,7 +95,7 @@ class TestImmutability:
     def test_parser_output_cannot_be_rewritten_in_place(self):
         interface = InterfaceInfo(name="ether1", status="up")
 
-        with pytest.raises(Exception):
+        with pytest.raises(dataclasses.FrozenInstanceError):
             interface.name = "tampered"
 
 

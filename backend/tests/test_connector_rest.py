@@ -5,13 +5,13 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from app.services.connectors.base import (
+from lynjax.services.connectors.base import (
     ConnectorAuthError,
     ConnectorError,
     ConnectorUnreachableError,
 )
-from app.services.connectors.rest import RESTConnector
-from app.services.connectors.rest_profiles import (
+from lynjax.services.connectors.rest import RESTConnector
+from lynjax.services.connectors.rest_profiles import (
     GenericJsonProfile,
     SophosProfile,
     get_profile,
@@ -335,12 +335,12 @@ class TestAudit:
 
 class TestRegistration:
     def test_it_registers_under_rest(self):
-        from app.services.connectors.base import get_connector
+        from lynjax.services.connectors.base import get_connector
 
         assert get_connector("rest") is RESTConnector
 
     def test_the_netvault_name_still_resolves(self):
         """Existing inventories say rest_api; they must keep working."""
-        from app.services.connectors.base import get_connector
+        from lynjax.services.connectors.base import get_connector
 
         assert get_connector("rest_api") is RESTConnector

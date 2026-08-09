@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.core.database import MIGRATIONS, Database, DatabaseError
+from lynjax.core.database import MIGRATIONS, Database, DatabaseError
 
 
 @pytest.fixture

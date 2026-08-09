@@ -31,7 +31,7 @@ python -m pip install -r requirements.txt
 ## Ejecutar API local
 
 ```bash
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+uvicorn lynjax.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Endpoints iniciales:

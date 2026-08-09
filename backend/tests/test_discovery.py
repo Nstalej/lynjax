@@ -12,13 +12,13 @@ import ipaddress
 
 import pytest
 
-from app.core.config import Settings
-from app.services.connector_factory import NetworkAccessDenied
-from app.services.discovery import (
+from lynjax.core.config import Settings
+from lynjax.services.connector_factory import NetworkAccessDeniedError
+from lynjax.services.discovery import (
     DEFAULT_MAX_HOSTS,
     DiscoveryError,
     DiscoveryService,
-    PublicScopeRefused,
+    PublicScopeRefusedError,
     ScopeTooLargeError,
     hint_from_banner,
     iter_hosts,
@@ -48,7 +48,7 @@ class TestScopeValidation:
 
     def test_public_address_space_is_refused_by_default(self):
         """A client site is a private range; public space needs written cover."""
-        with pytest.raises(PublicScopeRefused, match="written authorisation"):
+        with pytest.raises(PublicScopeRefusedError, match="written authorisation"):
             parse_scope(["8.8.8.0/24"])
 
     def test_public_space_can_be_opted_into(self):
@@ -112,7 +112,7 @@ class TestPolicyGate:
         """The most sensitive operation must respect the same switch."""
         service = DiscoveryService()
 
-        with pytest.raises(NetworkAccessDenied):
+        with pytest.raises(NetworkAccessDeniedError):
             await service.start(["192.168.1.0/30"], Settings(data_dir=tmp_path))
 
     async def test_an_oversized_scope_is_refused_before_anything_starts(

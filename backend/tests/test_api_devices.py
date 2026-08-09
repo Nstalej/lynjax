@@ -9,16 +9,16 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from app.core.config import Settings, get_settings
-from app.core.database import Database
-from app.core.deps import get_db, get_vault
-from app.main import app
-from app.services.connectors.base import (
+from lynjax.core.config import Settings, get_settings
+from lynjax.core.database import Database
+from lynjax.core.deps import get_db, get_vault
+from lynjax.main import app
+from lynjax.services.connectors.base import (
     AuditCheck,
     AuditResult,
     ConnectionTestResult,
 )
-from app.services.vault import CredentialVault
+from lynjax.services.vault import CredentialVault
 
 MASTER_KEY = "vLQ5wYAJc6qHhCUW3wRDGxQ0cWQFWpQxNKZbCKzE1yA="
 
@@ -209,7 +209,7 @@ class TestProbingWithAFakeConnector:
         async def fake_build(device, vault, settings):
             return self.instance
 
-        monkeypatch.setattr("app.api.routes.devices.build_connector", fake_build)
+        monkeypatch.setattr("lynjax.api.routes.devices.build_connector", fake_build)
 
     def _create(self, client):
         return client.post(

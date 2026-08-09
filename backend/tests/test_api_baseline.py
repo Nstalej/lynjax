@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
-
+from lynjax.main import app
 
 client = TestClient(app)
 

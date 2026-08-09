@@ -11,11 +11,11 @@ from __future__ import annotations
 import paramiko
 import pytest
 
-from app.services.connectors.base import (
+from lynjax.services.connectors.base import (
     ConnectorAuthError,
     ConnectorUnreachableError,
 )
-from app.services.connectors.ssh import SSHConnector
+from lynjax.services.connectors.ssh import SSHConnector
 from tests.test_parsers_cisco import SHOW_IP_INTERFACE_BRIEF, SHOW_VERSION
 from tests.test_parsers_mikrotik import ARP, INTERFACES, SYSTEM_RESOURCE
 
@@ -392,6 +392,6 @@ class TestInteractiveOutputCleaning:
 
 class TestRegistration:
     def test_the_connector_registers_itself_as_ssh(self):
-        from app.services.connectors.base import get_connector
+        from lynjax.services.connectors.base import get_connector
 
         assert get_connector("ssh") is SSHConnector

@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.connectors import snmp_oids as oids
-from app.services.connectors.base import ConnectorError
-from app.services.connectors.snmp import (
+from lynjax.services.connectors import snmp_oids as oids
+from lynjax.services.connectors.base import ConnectorError
+from lynjax.services.connectors.snmp import (
     SNMPConnector,
     build_arp_entries,
     build_auth_data,
@@ -96,7 +96,7 @@ class TestOidHelpers:
 
     def test_snmp_and_ssh_macs_agree(self):
         """The same NIC seen over both protocols must correlate."""
-        from app.services.connectors.parsers.cisco import parse_show_ip_arp
+        from lynjax.services.connectors.parsers.cisco import parse_show_ip_arp
 
         over_ssh = parse_show_ip_arp(
             "Internet  10.0.0.1  -  00aa.bbcc.ddee  ARPA  Fa0/1"
@@ -516,7 +516,7 @@ class TestRealTransport:
         pysnmp 7: the address lands on the `timeout` parameter. Nothing caught
         it because the transport was only ever exercised against real hardware.
         Port 16100 has no agent, so this must return None, not raise."""
-        from app.services.connectors.snmp import PySnmpTransport
+        from lynjax.services.connectors.snmp import PySnmpTransport
 
         transport = PySnmpTransport(
             "127.0.0.1",
@@ -530,7 +530,7 @@ class TestRealTransport:
         await transport.close()
 
     async def test_a_walk_against_a_silent_host_returns_no_rows(self):
-        from app.services.connectors.snmp import PySnmpTransport
+        from lynjax.services.connectors.snmp import PySnmpTransport
 
         transport = PySnmpTransport(
             "127.0.0.1",
@@ -545,7 +545,7 @@ class TestRealTransport:
 
     async def test_closing_releases_the_dispatcher(self):
         """Otherwise pysnmp leaves a pending timeout task per engine."""
-        from app.services.connectors.snmp import PySnmpTransport
+        from lynjax.services.connectors.snmp import PySnmpTransport
 
         transport = PySnmpTransport(
             "127.0.0.1",
@@ -563,6 +563,6 @@ class TestRealTransport:
 
 class TestRegistration:
     def test_the_connector_registers_itself_as_snmp(self):
-        from app.services.connectors.base import get_connector
+        from lynjax.services.connectors.base import get_connector
 
         assert get_connector("snmp") is SNMPConnector

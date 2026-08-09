@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.services.audit import (
+from lynjax.services.audit import (
     ChainTrace,
     DeviceSnapshot,
     NetworkSnapshot,
@@ -16,13 +16,13 @@ from app.services.audit import (
     run_network_audit,
     trace_chain,
 )
-from app.services.connectors.base import (
+from lynjax.services.connectors.base import (
     ArpEntry,
     InterfaceInfo,
     MacEntry,
     RouteEntry,
 )
-from app.services.devices import Device
+from lynjax.services.devices import Device
 
 ENDPOINT_IP = "10.0.0.50"
 ENDPOINT_MAC = "00:AA:BB:CC:DD:EE"
@@ -410,7 +410,7 @@ class TestVerdict:
         ],
     )
     def test_the_worst_status_wins(self, statuses, expected):
-        from app.services.audit import AuditCheck, ChainHop
+        from lynjax.services.audit import AuditCheck, ChainHop
 
         trace = ChainTrace(
             target="10.0.0.1",

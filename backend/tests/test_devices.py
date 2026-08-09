@@ -2,24 +2,25 @@
 
 from __future__ import annotations
 
+import aiosqlite
 import pytest
 
-from app.core.config import Settings
-from app.core.database import Database
-from app.services.connector_factory import (
+from lynjax.core.config import Settings
+from lynjax.core.database import Database
+from lynjax.services.connector_factory import (
     ConnectorNotAvailableError,
     MissingCredentialError,
-    NetworkAccessDenied,
+    NetworkAccessDeniedError,
     assert_network_allowed,
     build_connector,
 )
-from app.services.devices import (
+from lynjax.services.devices import (
     Device,
     DeviceNotFoundError,
     DeviceRepository,
     DuplicateDeviceError,
 )
-from app.services.vault import CredentialVault
+from lynjax.services.vault import CredentialVault
 
 MASTER_KEY = "vLQ5wYAJc6qHhCUW3wRDGxQ0cWQFWpQxNKZbCKzE1yA="
 
@@ -202,7 +203,7 @@ class TestCredentialLink:
     async def test_a_device_cannot_reference_a_credential_that_does_not_exist(
         self, repo
     ):
-        with pytest.raises(Exception):
+        with pytest.raises(aiosqlite.IntegrityError):
             await repo.create(
                 name="core",
                 host="10.0.0.1",
@@ -214,11 +215,12 @@ class TestCredentialLink:
 class TestNetworkPolicyGate:
     def test_the_default_policy_blocks_real_network_access(self, tmp_path):
         """The safety switch has to be on by default, or it is decoration."""
-        with pytest.raises(NetworkAccessDenied, match="authorized-targets"):
+        with pytest.raises(NetworkAccessDeniedError, match="authorized-targets"):
             assert_network_allowed(Settings(data_dir=tmp_path))
 
     def test_an_explicit_opt_in_allows_access(self, open_settings):
-        assert_network_allowed(open_settings) is None
+        # Returns None and does not raise; that is the whole contract.
+        assert assert_network_allowed(open_settings) is None
 
     async def test_the_factory_refuses_to_build_under_the_default_policy(
         self, repo, vault, tmp_path
@@ -231,7 +233,7 @@ class TestNetworkPolicyGate:
             credential_name="cred",
         )
 
-        with pytest.raises(NetworkAccessDenied):
+        with pytest.raises(NetworkAccessDeniedError):
             await build_connector(device, vault, Settings(data_dir=tmp_path))
 
 

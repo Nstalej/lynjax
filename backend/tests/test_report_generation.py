@@ -1,10 +1,10 @@
-from app.schemas.assessments import (
+from lynjax.schemas.assessments import (
     AssessmentEvidenceSummary,
     AssessmentTargetResult,
     ConnectivityAssessmentResponse,
     StructuredCheckResult,
 )
-from app.services.reports.markdown import render_connectivity_assessment_report
+from lynjax.services.reports.markdown import render_connectivity_assessment_report
 
 
 def test_markdown_renderer_uses_structured_assessment_data():

@@ -6,7 +6,7 @@ formats NetVault's regexes silently dropped.
 
 from __future__ import annotations
 
-from app.services.connectors.parsers import cisco
+from lynjax.services.connectors.parsers import cisco
 
 SHOW_VERSION = """
 Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 12.2(55)SE7, RELEASE SOFTWARE (fc1)

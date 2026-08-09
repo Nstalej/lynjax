@@ -8,7 +8,7 @@ do not rewrite them.
 
 from __future__ import annotations
 
-from app.services.connectors.parsers import mikrotik
+from lynjax.services.connectors.parsers import mikrotik
 
 SYSTEM_RESOURCE = """
              uptime: 5d21h34m56s

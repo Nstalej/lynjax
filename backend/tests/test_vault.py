@@ -10,8 +10,8 @@ from __future__ import annotations
 import pytest
 from cryptography.fernet import Fernet
 
-from app.core.database import Database
-from app.services.vault import (
+from lynjax.core.database import Database
+from lynjax.services.vault import (
     CredentialNotFoundError,
     CredentialVault,
     VaultDecryptionError,

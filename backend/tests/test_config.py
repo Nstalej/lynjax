@@ -11,8 +11,9 @@ from __future__ import annotations
 import os
 
 import pytest
+from pydantic import ValidationError
 
-from app.core.config import (
+from lynjax.core.config import (
     ConfigError,
     Settings,
     ensure_runtime_secrets,
@@ -62,19 +63,19 @@ class TestValidation:
     def test_out_of_range_port_is_rejected(self, monkeypatch):
         monkeypatch.setenv("LYNJAX_PORT", "70000")
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             Settings()
 
     def test_unknown_log_level_is_rejected(self, monkeypatch):
         monkeypatch.setenv("LYNJAX_LOG_LEVEL", "CHATTY")
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             Settings()
 
     def test_unknown_network_policy_is_rejected(self, monkeypatch):
         monkeypatch.setenv("LYNJAX_NETWORK_POLICY", "scan-everything")
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             Settings()
 
 

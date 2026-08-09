@@ -22,10 +22,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.core.config import Settings, ensure_runtime_secrets  # noqa: E402
-from app.core.database import Database  # noqa: E402
-from app.services.devices import DeviceRepository  # noqa: E402
-from app.services.vault import CredentialVault  # noqa: E402
+from lynjax.core.config import Settings, ensure_runtime_secrets  # noqa: E402
+from lynjax.core.database import Database  # noqa: E402
+from lynjax.services.devices import DeviceRepository  # noqa: E402
+from lynjax.services.vault import CredentialVault  # noqa: E402
 
 # Reserved for documentation by RFC 5737. Never a real host.
 DEMO_CREDENTIALS = [
@@ -99,7 +99,7 @@ async def seed(reset: bool) -> None:
 
     print(
         "\nDone. Start the API with:\n"
-        "    uvicorn app.main:app --reload\n"
+        "    uvicorn lynjax.main:app --reload\n"
         "then open http://127.0.0.1:8000/docs\n\n"
         "Probing these devices returns 403 until you set\n"
         "    LYNJAX_NETWORK_POLICY=authorized-targets\n"

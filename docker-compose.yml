@@ -1,0 +1,22 @@
+# One service. NetVault needed two plus an nginx proxy config.
+services:
+  lynjax:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lynjax:local
+    container_name: lynjax
+    restart: unless-stopped
+    ports:
+      - "${LYNJAX_PORT:-8080}:8080"
+    volumes:
+      - lynjax-data:/data
+    environment:
+      # Real network access is off by default. Set this to authorized-targets
+      # only for a network you have written authorisation to assess.
+      LYNJAX_NETWORK_POLICY: "${LYNJAX_NETWORK_POLICY:-simulated-checks-only}"
+      LYNJAX_LOG_LEVEL: "${LYNJAX_LOG_LEVEL:-INFO}"
+      TZ: "${TZ:-UTC}"
+
+volumes:
+  lynjax-data:
