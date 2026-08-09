@@ -41,6 +41,39 @@ MIGRATIONS: tuple[tuple[int, str], ...] = (
             ON credential_store(name);
         """,
     ),
+    (
+        2,
+        """
+        -- One host column, not NetVault's parallel `ip` and `ip_address`, which
+        -- drifted apart and left callers guessing which one was populated.
+        -- The credential link is by name and really points at credential_store;
+        -- NetVault's foreign key named a `credentials` table that the vault
+        -- never wrote to, and nothing caught it because foreign keys were off.
+        CREATE TABLE IF NOT EXISTS devices (
+            id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+            name               TEXT NOT NULL UNIQUE,
+            host               TEXT NOT NULL,
+            port               INTEGER,
+            connector_type     TEXT NOT NULL,
+            device_type        TEXT NOT NULL DEFAULT 'auto',
+            credential_name    TEXT,
+            description        TEXT,
+            is_active          INTEGER NOT NULL DEFAULT 1,
+            status             TEXT NOT NULL DEFAULT 'unknown',
+            last_seen          TIMESTAMP,
+            last_status_change TIMESTAMP,
+            created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at         TIMESTAMP,
+            FOREIGN KEY (credential_name)
+                REFERENCES credential_store(name)
+                ON DELETE SET NULL
+                ON UPDATE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_devices_host ON devices(host);
+        CREATE INDEX IF NOT EXISTS idx_devices_active ON devices(is_active);
+        """,
+    ),
 )
 
 
