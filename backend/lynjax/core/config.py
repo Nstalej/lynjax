@@ -81,6 +81,14 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = Field(default=8080, ge=1, le=65535)
 
+    # ─── Polling ───
+    # Off by default. A field audit runs on demand, and a tool that starts
+    # touching a client's network on a timer the moment it launches is not what
+    # anyone wants on a laptop. Continuous polling is for a server deployment.
+    polling_enabled: bool = False
+    polling_interval_minutes: int = Field(default=5, ge=1, le=1440)
+    polling_concurrency: int = Field(default=10, ge=1, le=100)
+
     # ─── Storage ───
     data_dir: Path = Field(default_factory=default_data_dir)
     db_filename: str = "lynjax.db"

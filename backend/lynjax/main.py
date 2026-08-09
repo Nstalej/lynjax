@@ -10,6 +10,8 @@ from lynjax.api.routes.info import router as info_router
 from lynjax.api.routes.network import router as network_router
 from lynjax.core.config import ensure_runtime_secrets, get_settings
 from lynjax.core.database import Database
+from lynjax.services.devices import DeviceRepository
+from lynjax.services.scheduler import build_scheduler
 from lynjax.services.vault import CredentialVault
 from lynjax.web import mount_frontend
 
@@ -33,9 +35,23 @@ async def lifespan(app: FastAPI):
     app.state.db = database
     app.state.vault = CredentialVault(database, resolved.credentials_master_key)
 
+    scheduler = None
+    if resolved.polling_enabled:
+        scheduler = build_scheduler(
+            DeviceRepository(database),
+            app.state.vault,
+            resolved,
+            interval_minutes=resolved.polling_interval_minutes,
+            concurrency=resolved.polling_concurrency,
+        )
+        await scheduler.start()
+    app.state.scheduler = scheduler
+
     try:
         yield
     finally:
+        if scheduler is not None:
+            await scheduler.stop()
         await database.disconnect()
 
 
