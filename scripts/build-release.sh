@@ -19,7 +19,7 @@ cp -r frontend/dist backend/lynjax/web
 echo "==> Building the wheel and sdist"
 cd backend
 rm -rf dist build
-python -m build
+"${PYTHON:-python}" -m build
 
 echo
 echo "==> Artifacts"
@@ -27,7 +27,7 @@ ls -lh dist/
 
 echo
 echo "Verify the interface really shipped:"
-python - <<'PY'
+"${PYTHON:-python}" - <<'PY'
 import glob, zipfile
 wheel = glob.glob("dist/*.whl")[0]
 names = zipfile.ZipFile(wheel).namelist()
