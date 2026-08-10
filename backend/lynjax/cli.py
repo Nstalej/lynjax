@@ -30,6 +30,8 @@ from lynjax.core.config import (
 )
 from lynjax.core.database import Database
 from lynjax.core.logging import configure_logging
+from lynjax.services.agents import AgentRepository
+from lynjax.services.audits import AuditRepository
 from lynjax.services.devices import DeviceRepository
 from lynjax.services.users import UserRepository
 from lynjax.services.vault import CredentialVault
@@ -242,10 +244,15 @@ async def cmd_purge(args: argparse.Namespace) -> int:
         repo = DeviceRepository(database)
         devices = await repo.purge_all()
         credentials = await vault.purge_all()
+        audits = await AuditRepository(database).purge_all()
+        agents = await AgentRepository(database).purge_all()
     finally:
         await database.disconnect()
 
-    print(f"Removed {devices} device(s) and {credentials} credential(s).")
+    print(
+        f"Removed {devices} device(s), {credentials} credential(s), "
+        f"{audits} stored audit(s) and {agents} agent(s)."
+    )
     print()
     print(
         "Reports held by a running `lynjax serve` live in that process's memory "

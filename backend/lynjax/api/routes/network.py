@@ -14,14 +14,17 @@ from pydantic import BaseModel, Field
 
 from lynjax.core.deps import (
     AdminDep,
+    DatabaseDep,
     DeviceRepositoryDep,
     OperatorDep,
     SettingsDep,
     VaultDep,
     ViewerDep,
 )
+from lynjax.services.agents import AgentRepository
 from lynjax.services.assessment import render_markdown, run_assessment
 from lynjax.services.audit import run_network_audit
+from lynjax.services.audits import AuditRepository
 from lynjax.services.connector_factory import NetworkAccessDeniedError
 from lynjax.services.discovery import (
     DiscoveryError,
@@ -123,6 +126,7 @@ async def run_audit(
     repo: DeviceRepositoryDep,
     vault: VaultDep,
     settings: SettingsDep,
+    db: DatabaseDep,
     _user: OperatorDep,
 ) -> dict:
     """Collect from every active device, analyse, and keep the result.
@@ -144,12 +148,34 @@ async def run_audit(
 
     _report_store(request).add(assessment.assessment_id, assessment, payload.locale)
 
+    body = _audit_payload(assessment, payload.locale)
+
+    # Persisted as well as held: the in-memory copy makes the immediate download
+    # cheap, and the stored row is what the history screen reads after a restart.
+    await AuditRepository(db).save(
+        assessment_id=assessment.assessment_id,
+        payload=body,
+        client=payload.client or None,
+        audit_type="trace" if payload.trace_target else "network",
+        verdict=assessment.verdict,
+        checks_total=len(assessment.findings),
+        issues_total=sum(1 for check in assessment.findings if check.status != "pass"),
+        summary=assessment.summarise(payload.locale),
+        locale=payload.locale,
+        started_at=assessment.started_at,
+        completed_at=assessment.completed_at,
+    )
+
+    return body
+
+
+def _audit_payload(assessment, locale: str) -> dict:
     return {
         "assessment_id": assessment.assessment_id,
         "client": assessment.client,
         "started_at": assessment.started_at.isoformat(),
         "verdict": assessment.verdict,
-        "summary": assessment.summarise(payload.locale),
+        "summary": assessment.summarise(locale),
         "devices_assessed": len(assessment.snapshot.devices),
         "unreachable": [
             {"device": name, "reason": reason}
@@ -291,6 +317,7 @@ async def purge_client_data(
     request: Request,
     repo: DeviceRepositoryDep,
     vault: VaultDep,
+    db: DatabaseDep,
     _user: AdminDep,
 ) -> dict:
     """Remove every trace of a client's engagement.
@@ -303,15 +330,22 @@ async def purge_client_data(
     devices = await repo.purge_all()
     credentials = await vault.purge_all()
     reports = _report_store(request).purge()
+    audits = await AuditRepository(db).purge_all()
+    agents = await AgentRepository(db).purge_all()
 
     logger.warning(
-        "Client data purged: %s device(s), %s credential(s), %s report(s)",
+        "Client data purged: %s device(s), %s credential(s), %s report(s), "
+        "%s stored audit(s), %s agent(s)",
         devices,
         credentials,
         reports,
+        audits,
+        agents,
     )
     return {
         "devices_removed": devices,
         "credentials_removed": credentials,
         "reports_removed": reports,
+        "audits_removed": audits,
+        "agents_removed": agents,
     }

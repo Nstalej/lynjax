@@ -48,7 +48,9 @@ class TestParser:
             build_parser().parse_args(["audit", "--locale", "fr"])
 
     def test_serve_accepts_host_and_port(self):
-        args = build_parser().parse_args(["serve", "--host", "0.0.0.0", "--port", "9000"])
+        args = build_parser().parse_args(
+            ["serve", "--host", "0.0.0.0", "--port", "9000"]
+        )
 
         assert args.host == "0.0.0.0"
         assert args.port == 9000

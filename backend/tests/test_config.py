@@ -228,7 +228,9 @@ class TestExplicitEnvFile:
     def test_unprefixed_keys_are_ignored(self, tmp_path, monkeypatch):
         """Ignored rather than guessed at: that confusion is what leaked."""
         target = tmp_path / "lynjax.env"
-        target.write_text("PORT=9123\nNETWORK_POLICY=authorized-targets\n", encoding="utf-8")
+        target.write_text(
+            "PORT=9123\nNETWORK_POLICY=authorized-targets\n", encoding="utf-8"
+        )
         monkeypatch.setenv("LYNJAX_ENV_FILE", str(target))
 
         load_env_file()

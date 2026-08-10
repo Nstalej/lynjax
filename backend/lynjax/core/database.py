@@ -91,6 +91,53 @@ MIGRATIONS: tuple[tuple[int, str], ...] = (
         CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
         """,
     ),
+    (
+        4,
+        """
+        -- Audit history. Reports used to live only in the process's memory, so
+        -- a restart erased every past run and the Audits screen had nothing to
+        -- list. The findings are stored with the run: re-deriving them would
+        -- mean touching the client's network again to redraw a past report.
+        CREATE TABLE IF NOT EXISTS audits (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            assessment_id TEXT NOT NULL UNIQUE,
+            client        TEXT,
+            target        TEXT NOT NULL DEFAULT 'Global Network',
+            audit_type    TEXT NOT NULL DEFAULT 'network',
+            device_id     INTEGER,
+            status        TEXT NOT NULL DEFAULT 'success',
+            verdict       TEXT NOT NULL DEFAULT 'pass',
+            checks_total  INTEGER NOT NULL DEFAULT 0,
+            issues_total  INTEGER NOT NULL DEFAULT 0,
+            summary       TEXT,
+            payload_json  TEXT NOT NULL,
+            locale        TEXT NOT NULL DEFAULT 'es',
+            started_at    TIMESTAMP NOT NULL,
+            completed_at  TIMESTAMP,
+            created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE SET NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_audits_started ON audits(started_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_audits_type ON audits(audit_type);
+
+        -- Remote agents. The Windows AD collector is not ported yet, but the
+        -- registration and heartbeat surface is what tells an operator whether
+        -- one is alive, and the screen is useless without it.
+        CREATE TABLE IF NOT EXISTS agents (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id       TEXT NOT NULL UNIQUE,
+            name           TEXT NOT NULL,
+            host           TEXT NOT NULL,
+            agent_type     TEXT NOT NULL DEFAULT 'windows_ad',
+            version        TEXT,
+            last_heartbeat TIMESTAMP,
+            registered_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_agents_agent_id ON agents(agent_id);
+        """,
+    ),
 )
 
 
