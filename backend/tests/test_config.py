@@ -9,6 +9,7 @@ visibly. Every test below pins behaviour that used to be assumed.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -18,6 +19,7 @@ from lynjax.core.config import (
     Settings,
     ensure_runtime_secrets,
     get_settings,
+    load_env_file,
 )
 
 
@@ -175,3 +177,79 @@ class TestFailureReporting:
 class TestSettingsCache:
     def test_get_settings_returns_a_cached_instance(self):
         assert get_settings() is get_settings()
+
+
+class TestStrayEnvFilesAreIgnored:
+    """A .env in the working directory must not configure an installed tool.
+
+    Found by installing the wheel and running it from another folder: the app
+    reported a different name because it had read that folder's .env. The same
+    path let an unprefixed NETWORK_POLICY flip real network access on, which is
+    the guard the whole product leans on.
+    """
+
+    @pytest.fixture
+    def hostile_cwd(self, tmp_path, monkeypatch):
+        (tmp_path / ".env").write_text(
+            "APP_NAME=Compromised\n"
+            "SECRET_KEY=injected-by-a-stray-file\n"
+            "NETWORK_POLICY=authorized-targets\n"
+            "DATA_DIR=/somewhere/else\n",
+            encoding="utf-8",
+        )
+        monkeypatch.chdir(tmp_path)
+        return tmp_path
+
+    def test_a_stray_env_file_cannot_rename_the_app(self, hostile_cwd):
+        assert Settings().app_name == "Lynjax"
+
+    def test_a_stray_env_file_cannot_set_the_signing_key(self, hostile_cwd):
+        assert Settings().secret_key is None
+
+    def test_a_stray_env_file_cannot_enable_real_network_access(self, hostile_cwd):
+        """The one that matters: the guard must not be switchable by a file
+        that merely happens to sit in the current directory."""
+        assert Settings().network_policy == "simulated-checks-only"
+
+    def test_a_stray_env_file_cannot_redirect_the_data_directory(self, hostile_cwd):
+        assert Settings().data_dir != Path("/somewhere/else")
+
+
+class TestExplicitEnvFile:
+    def test_a_named_file_is_loaded(self, tmp_path, monkeypatch):
+        target = tmp_path / "lynjax.env"
+        target.write_text("LYNJAX_PORT=9123\n", encoding="utf-8")
+        monkeypatch.setenv("LYNJAX_ENV_FILE", str(target))
+
+        load_env_file()
+
+        assert Settings().port == 9123
+
+    def test_unprefixed_keys_are_ignored(self, tmp_path, monkeypatch):
+        """Ignored rather than guessed at: that confusion is what leaked."""
+        target = tmp_path / "lynjax.env"
+        target.write_text("PORT=9123\nNETWORK_POLICY=authorized-targets\n", encoding="utf-8")
+        monkeypatch.setenv("LYNJAX_ENV_FILE", str(target))
+
+        load_env_file()
+
+        assert Settings().port == 8080
+        assert Settings().network_policy == "simulated-checks-only"
+
+    def test_an_existing_variable_wins_over_the_file(self, tmp_path, monkeypatch):
+        target = tmp_path / "lynjax.env"
+        target.write_text("LYNJAX_PORT=9123\n", encoding="utf-8")
+        monkeypatch.setenv("LYNJAX_ENV_FILE", str(target))
+        monkeypatch.setenv("LYNJAX_PORT", "7000")
+
+        load_env_file()
+
+        assert Settings().port == 7000
+
+    def test_a_missing_file_is_not_an_error(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("LYNJAX_ENV_FILE", str(tmp_path / "absent.env"))
+
+        assert load_env_file() == {}
+
+    def test_nothing_is_read_when_no_file_is_named(self):
+        assert load_env_file() == {}

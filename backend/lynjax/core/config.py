@@ -21,6 +21,7 @@ All environment variables use the ``LYNJAX_`` prefix, e.g. ``LYNJAX_PORT=9000``.
 from __future__ import annotations
 
 import contextlib
+import logging
 import os
 import secrets
 import stat
@@ -31,6 +32,8 @@ from typing import Literal
 from platformdirs import user_data_dir, user_log_dir
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger("lynjax.config")
 
 APP_NAME = "Lynjax"
 APP_SLUG = "lynjax"
@@ -57,10 +60,19 @@ def default_log_dir() -> Path:
 
 
 class Settings(BaseSettings):
+    # No env_file here, deliberately. pydantic-settings resolves a relative
+    # env_file against the *current working directory*, so an installed `lynjax`
+    # would read a stray .env from wherever a technician happened to run it. That
+    # is not hypothetical: a .env sitting in a client folder could override
+    # SECRET_KEY, redirect the data directory, and — worst — flip
+    # network_policy to authorized-targets, silently disabling the guard that
+    # stops Lynjax touching a network nobody approved.
+    #
+    # Configuration comes from LYNJAX_* environment variables. To load a file,
+    # point LYNJAX_ENV_FILE at it explicitly; see `load_env_file`.
     model_config = SettingsConfigDict(
         env_prefix="LYNJAX_",
-        env_file=".env",
-        env_file_encoding="utf-8",
+        env_file=None,
         extra="ignore",
     )
 
@@ -227,6 +239,37 @@ def _write_secrets_file(path: Path, values: dict[str, str]) -> None:
     _restrict_permissions(path)
 
 
+def load_env_file(path: str | Path | None = None) -> dict[str, str]:
+    """Load an env file the operator named explicitly.
+
+    Only ``LYNJAX_``-prefixed keys are applied, and only when the variable is
+    not already set, so a file can never quietly beat an explicit environment
+    variable. Nothing is read unless a path is given.
+    """
+    target = Path(path or os.environ.get("LYNJAX_ENV_FILE", "")).expanduser()
+    if not str(target) or not target.is_file():
+        return {}
+
+    applied: dict[str, str] = {}
+    for line in target.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        if not key.startswith("LYNJAX_"):
+            # Unprefixed keys are ignored rather than guessed at: this is the
+            # exact confusion that let APP_NAME and SECRET_KEY leak in.
+            continue
+        if key not in os.environ:
+            os.environ[key] = value.strip()
+            applied[key] = value.strip()
+
+    if applied:
+        logger.info("Loaded %s setting(s) from %s", len(applied), target)
+    return applied
+
+
 @lru_cache
 def get_settings() -> Settings:
     """Cached settings for dependency injection.
@@ -234,4 +277,5 @@ def get_settings() -> Settings:
     Reads only. Call ``ensure_runtime_secrets`` explicitly when the process
     actually needs the keys, so importing this module never has side effects.
     """
+    load_env_file()
     return Settings()

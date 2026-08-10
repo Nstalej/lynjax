@@ -323,3 +323,24 @@ class TestConnectorFactory:
 
         with pytest.raises(MissingCredentialError, match="no credential"):
             await build_connector(device, vault, open_settings)
+
+
+class TestConnectorRegistry:
+    """Guards what the factory actually makes available.
+
+    The REST connector registers itself on import, but the factory only imported
+    ssh and snmp, so `rest` was missing from a real install while every REST test
+    passed: those import the module directly, which masks the omission.
+    """
+
+    def test_every_shipped_connector_is_registered(self):
+        import lynjax.services.connector_factory  # noqa: F401
+        from lynjax.services.connectors.base import available_connectors
+
+        assert set(available_connectors()) >= {"ssh", "snmp", "rest"}
+
+    def test_the_netvault_rest_alias_still_resolves(self):
+        import lynjax.services.connector_factory  # noqa: F401
+        from lynjax.services.connectors.base import get_connector
+
+        assert get_connector("rest_api") is not None

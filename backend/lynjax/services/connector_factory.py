@@ -19,6 +19,7 @@ from lynjax.core.config import Settings
 
 # Imported for their side effect: each module registers itself in the connector
 # registry at import time, so this is where the available set is decided.
+from lynjax.services.connectors import rest as _rest  # noqa: F401
 from lynjax.services.connectors import snmp as _snmp  # noqa: F401
 from lynjax.services.connectors import ssh as _ssh  # noqa: F401
 from lynjax.services.connectors.base import BaseConnector, get_connector

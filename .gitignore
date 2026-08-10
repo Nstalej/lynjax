@@ -81,3 +81,9 @@ temp/
 
 # Compiled frontend: built by CI and by the Docker image, not committed.
 frontend/dist/
+
+# Build artifacts and the bundled frontend copy (produced by the release script)
+backend/dist/
+backend/build/
+backend/*.egg-info/
+backend/lynjax/web/
