@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from lynjax.api.routes.assessments import router as assessments_router
 from lynjax.api.routes.auth import router as auth_router
 from lynjax.api.routes.devices import router as devices_router
 from lynjax.api.routes.health import router as health_router
@@ -11,7 +10,9 @@ from lynjax.api.routes.info import router as info_router
 from lynjax.api.routes.network import router as network_router
 from lynjax.core.config import ensure_runtime_secrets, get_settings
 from lynjax.core.database import Database
+from lynjax.core.logging import configure_logging
 from lynjax.services.devices import DeviceRepository
+from lynjax.services.reports.store import ReportStore
 from lynjax.services.scheduler import build_scheduler
 from lynjax.services.vault import CredentialVault
 from lynjax.web import mount_frontend
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
     starting: the API answered, just wrongly.
     """
     resolved = ensure_runtime_secrets(get_settings())
+    configure_logging(resolved)
 
     database = Database(resolved.db_path)
     await database.connect()
@@ -35,6 +37,7 @@ async def lifespan(app: FastAPI):
     app.state.settings = resolved
     app.state.db = database
     app.state.vault = CredentialVault(database, resolved.credentials_master_key)
+    app.state.reports = ReportStore()
 
     scheduler = None
     if resolved.polling_enabled:
@@ -73,7 +76,6 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(info_router)
-app.include_router(assessments_router)
 app.include_router(devices_router)
 app.include_router(network_router)
 

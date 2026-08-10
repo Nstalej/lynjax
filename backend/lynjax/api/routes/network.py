@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
 from lynjax.core.deps import (
+    AdminDep,
     DeviceRepositoryDep,
     OperatorDep,
     SettingsDep,
@@ -27,6 +28,7 @@ from lynjax.services.discovery import (
     DiscoveryService,
     summarise,
 )
+from lynjax.services.reports.store import ReportStore
 
 logger = logging.getLogger("lynjax.api.network")
 
@@ -140,11 +142,7 @@ async def run_audit(
     except NetworkAccessDeniedError as exc:
         raise _deny(exc) from exc
 
-    reports = getattr(request.app.state, "reports", None)
-    if reports is None:
-        reports = {}
-        request.app.state.reports = reports
-    reports[assessment.assessment_id] = (assessment, payload.locale)
+    _report_store(request).add(assessment.assessment_id, assessment, payload.locale)
 
     return {
         "assessment_id": assessment.assessment_id,
@@ -161,6 +159,14 @@ async def run_audit(
         "trace": _trace_payload(assessment.trace) if assessment.trace else None,
         "report_url": f"/api/v1/reports/{assessment.assessment_id}",
     }
+
+
+def _report_store(request: Request) -> ReportStore:
+    store = getattr(request.app.state, "reports", None)
+    if store is None:
+        store = ReportStore()
+        request.app.state.reports = store
+    return store
 
 
 def _trace_payload(trace) -> dict:
@@ -193,8 +199,7 @@ async def download_report(
     fmt: str = Query(default="md", pattern="^(md|pdf)$"),
 ) -> Response:
     """Download a report produced by a previous audit."""
-    reports = getattr(request.app.state, "reports", {})
-    entry = reports.get(assessment_id)
+    entry = _report_store(request).get(assessment_id)
     if entry is None:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
@@ -279,3 +284,34 @@ async def network_findings(
         CheckResponse(**asdict(check))
         for check in run_network_audit(assessment.snapshot)
     ]
+
+
+@router.post("/purge", status_code=status.HTTP_200_OK)
+async def purge_client_data(
+    request: Request,
+    repo: DeviceRepositoryDep,
+    vault: VaultDep,
+    _user: AdminDep,
+) -> dict:
+    """Remove every trace of a client's engagement.
+
+    Devices, credentials and the reports held in memory. The CLI cannot reach
+    that last group — it runs in a different process — so a technician who ran
+    `lynjax purge` against a live server still had device names, addresses and
+    findings sitting in it. This is the one call that clears all three.
+    """
+    devices = await repo.purge_all()
+    credentials = await vault.purge_all()
+    reports = _report_store(request).purge()
+
+    logger.warning(
+        "Client data purged: %s device(s), %s credential(s), %s report(s)",
+        devices,
+        credentials,
+        reports,
+    )
+    return {
+        "devices_removed": devices,
+        "credentials_removed": credentials,
+        "reports_removed": reports,
+    }

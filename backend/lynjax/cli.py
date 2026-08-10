@@ -29,6 +29,7 @@ from lynjax.core.config import (
     get_settings,
 )
 from lynjax.core.database import Database
+from lynjax.core.logging import configure_logging
 from lynjax.services.devices import DeviceRepository
 from lynjax.services.users import UserRepository
 from lynjax.services.vault import CredentialVault
@@ -41,6 +42,7 @@ def _print_header() -> None:
 
 
 async def _open(settings: Settings) -> Database:
+    configure_logging(settings)
     database = Database(settings.db_path)
     await database.connect()
     return database
@@ -244,6 +246,12 @@ async def cmd_purge(args: argparse.Namespace) -> int:
         await database.disconnect()
 
     print(f"Removed {devices} device(s) and {credentials} credential(s).")
+    print()
+    print(
+        "Reports held by a running `lynjax serve` live in that process's memory "
+        "and cannot be reached from here. Restart it, or call POST "
+        "/api/v1/purge, to clear those too."
+    )
     return 0
 
 

@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from lynjax.core.config import Settings, get_settings
-from lynjax.schemas.assessments import InfoResponse
+from lynjax.schemas.system import InfoResponse
 
 router = APIRouter(prefix="/api/v1")
 
