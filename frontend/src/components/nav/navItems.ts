@@ -1,22 +1,21 @@
-import type { TranslationKey } from '../../i18n';
-
+/**
+ * The menu.
+ *
+ * Five entries, the ones NetVault had. The previous list was ten modules with
+ * descriptions and "planned" badges, which is a product tour rather than a
+ * console. Topology became a Dashboard panel and Reports an action inside
+ * Audits, because neither is somewhere an operator navigates to on its own.
+ */
 export type NavItem = {
-  id: string;
-  labelKey: TranslationKey;
-  descriptionKey: TranslationKey;
-  badgeKey?: TranslationKey;
-  status: 'active' | 'ready' | 'planned' | 'readonly';
+  id: 'dashboard' | 'devices' | 'agents' | 'audits' | 'settings';
+  label: string;
+  icon: string;
 };
 
 export const navItems: NavItem[] = [
-  { id: 'overview', labelKey: 'nav.overview', descriptionKey: 'module.overview.summary', status: 'active' },
-  { id: 'assets', labelKey: 'nav.assets', descriptionKey: 'module.assets.summary', status: 'ready' },
-  { id: 'connectivity', labelKey: 'nav.connectivity', descriptionKey: 'module.connectivity.summary', status: 'ready' },
-  { id: 'assessments', labelKey: 'nav.assessments', descriptionKey: 'module.assessments.summary', status: 'ready' },
-  { id: 'evidence', labelKey: 'nav.evidence', descriptionKey: 'module.evidence.summary', status: 'ready' },
-  { id: 'reports', labelKey: 'nav.reports', descriptionKey: 'module.reports.summary', status: 'ready' },
-  { id: 'topology', labelKey: 'nav.topology', descriptionKey: 'module.topology.summary', status: 'planned' },
-  { id: 'directory', labelKey: 'nav.directory', descriptionKey: 'module.directory.summary', badgeKey: 'badge.readonlyPlanned', status: 'readonly' },
-  { id: 'intelligence', labelKey: 'nav.intelligence', descriptionKey: 'module.intelligence.summary', badgeKey: 'badge.readonlyPlanned', status: 'readonly' },
-  { id: 'settings', labelKey: 'nav.settings', descriptionKey: 'module.settings.summary', status: 'planned' },
+  { id: 'dashboard', label: 'Dashboard', icon: '◧' },
+  { id: 'devices', label: 'Dispositivos', icon: '▦' },
+  { id: 'agents', label: 'Agentes', icon: '◉' },
+  { id: 'audits', label: 'Auditorías', icon: '✓' },
+  { id: 'settings', label: 'Configuración', icon: '⚙' },
 ];

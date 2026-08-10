@@ -1,14 +1,13 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { navItems } from '../components/nav/navItems';
 import type { Account } from '../lib/api';
-import { useI18n } from '../i18n';
-import { AssetsPage } from '../pages/AssetsPage';
-import { AuditPage } from '../pages/AuditPage';
-import { DiscoveryPage } from '../pages/DiscoveryPage';
-import { ModulePage, OverviewPage } from '../pages/LynjaxDashboard';
-import { Sidebar } from './Sidebar';
-import { Topbar } from './Topbar';
+import { AgentsPage } from '../pages/AgentsPage';
+import { AuditsPage } from '../pages/AuditsPage';
+import { DashboardPage } from '../pages/DashboardPage';
+import { DevicesPage } from '../pages/DevicesPage';
+import { SettingsPage } from '../pages/SettingsPage';
 
+/** The console: a sidebar, a header strip, and the active module. */
 export function AppShell({
   account,
   onSignOut,
@@ -16,55 +15,67 @@ export function AppShell({
   account: Account;
   onSignOut: () => void;
 }) {
-  const { language, t } = useI18n();
-  const [activeModule, setActiveModule] = useState('overview');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [active, setActive] = useState<string>('dashboard');
+  const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+  const pages: Record<string, ReactNode> = {
+    dashboard: <DashboardPage onNavigate={setActive} />,
+    devices: <DevicesPage />,
+    agents: <AgentsPage />,
+    audits: <AuditsPage />,
+    settings: <SettingsPage account={account} />,
+  };
 
-  const activeItem = useMemo(
-    () => navItems.find((item) => item.id === activeModule) ?? navItems[0],
-    [activeModule],
-  );
-
-  // Modules backed by the real API render their own page; the rest still show
-  // the placeholder panel, which is honest about what is not built yet.
-  let content: ReactNode;
-  if (activeItem.id === 'overview') {
-    content = <OverviewPage onNavigate={setActiveModule} />;
-  } else if (activeItem.id === 'assets') {
-    content = <AssetsPage />;
-  } else if (activeItem.id === 'assessments' || activeItem.id === 'reports') {
-    content = <AuditPage />;
-  } else if (activeItem.id === 'connectivity') {
-    content = <DiscoveryPage />;
-  } else {
-    content = <ModulePage item={activeItem} />;
-  }
+  const current = navItems.find((item) => item.id === active) ?? navItems[0];
 
   return (
-    <>
-      <a className="skip-link" href="#main-content">{t('app.skipLink')}</a>
-      <div className={`platform-shell ${sidebarCollapsed ? 'platform-shell--collapsed' : ''}`}>
-        <Sidebar
-          activeModule={activeItem.id}
-          collapsed={sidebarCollapsed}
-          mobileOpen={mobileOpen}
-          onCloseMobile={() => setMobileOpen(false)}
-          onNavigate={setActiveModule}
-          onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
-        />
-        <div className="platform-shell__workspace">
-          <Topbar account={account} onOpenMobile={() => setMobileOpen(true)} onSignOut={onSignOut} />
-          <main className="platform-main" id="main-content" tabIndex={-1}>
-            {content}
-          </main>
-          <footer className="platform-footer">{t('footer.safety')}</footer>
+    <div className={`console ${collapsed ? 'console--collapsed' : ''}`}>
+      <aside className="console__nav">
+        <div className="console__brand">
+          <span className="console__mark" aria-hidden="true" />
+          <strong className="console__name">Lynjax</strong>
         </div>
+
+        <nav>
+          {navItems.map((item) => (
+            <button
+              className={`nav-item ${item.id === active ? 'nav-item--active' : ''}`}
+              key={item.id}
+              onClick={() => setActive(item.id)}
+              title={item.label}
+              type="button"
+            >
+              <span aria-hidden="true">{item.icon}</span>
+              <span className="nav-item__label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <button
+          className="console__collapse"
+          onClick={() => setCollapsed((value) => !value)}
+          title={collapsed ? 'Expandir' : 'Contraer'}
+          type="button"
+        >
+          {collapsed ? '»' : '«'}
+        </button>
+      </aside>
+
+      <div className="console__body">
+        <header className="console__header">
+          <h1>{current.label}</h1>
+          <div className="console__session">
+            <span title={`Rol: ${account.role}`}>
+              {account.email} · {account.role}
+            </span>
+            <button className="button button--ghost" onClick={onSignOut} type="button">
+              Salir
+            </button>
+          </div>
+        </header>
+
+        <main className="console__main">{pages[active]}</main>
       </div>
-    </>
+    </div>
   );
 }

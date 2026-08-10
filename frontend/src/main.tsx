@@ -1,4 +1,5 @@
 import './styles/global.css';
+import './styles/console.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nProvider } from './i18n';
