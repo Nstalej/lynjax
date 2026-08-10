@@ -198,6 +198,125 @@ export type DiscoveryJob = {
   results: DiscoveredHost[];
 };
 
+export type DashboardSummary = {
+  devices: {
+    total: number;
+    active: number;
+    by_status: Record<'online' | 'offline' | 'warning' | 'unknown', number>;
+  };
+  health_score: number | null;
+  health_basis: string;
+  agents: { total: number; online: number };
+  audits: {
+    by_verdict: Record<string, number>;
+    recent: {
+      assessment_id: string;
+      target: string;
+      audit_type: string;
+      verdict: string;
+      issues_total: number;
+      started_at: string;
+    }[];
+  };
+  network_policy: string;
+};
+
+export type TopologyNode = {
+  id: string;
+  label: string;
+  kind: 'device' | 'endpoint' | 'gateway' | 'unmanaged';
+  status: string;
+  detail: Record<string, unknown>;
+};
+
+export type TopologyEdge = {
+  source: string;
+  target: string;
+  evidence: string;
+  label: string;
+};
+
+export type Topology = {
+  nodes: TopologyNode[];
+  edges: TopologyEdge[];
+  notes: string[];
+};
+
+export type InterfaceRow = {
+  name: string;
+  status: string;
+  speed: number | null;
+  mac: string | null;
+  ip: string | null;
+  rx_bytes: number;
+  tx_bytes: number;
+  errors: number;
+};
+
+export type ArpRow = { ip: string; mac: string; interface: string; type: string };
+export type MacRow = { mac: string; port: string; vlan: number; type: string };
+export type RouteRow = {
+  destination: string;
+  gateway: string;
+  interface: string;
+  metric: number;
+  protocol: string;
+};
+
+export type DeviceData = {
+  device: {
+    id: number;
+    name: string;
+    host: string;
+    connector_type: string;
+    device_type: string;
+  };
+  error: string | null;
+  collected: boolean;
+  system: Record<string, string>;
+  interfaces: InterfaceRow[];
+  arp: ArpRow[];
+  mac: MacRow[];
+  routes: RouteRow[];
+};
+
+export type AuditRecord = {
+  id: number;
+  assessment_id: string;
+  client: string | null;
+  target: string;
+  audit_type: string;
+  status: string;
+  verdict: 'pass' | 'warning' | 'fail';
+  checks_total: number;
+  issues_total: number;
+  summary: string | null;
+  started_at: string;
+  completed_at: string | null;
+};
+
+export type StoredAudit = AuditRecord & { payload: AuditResult };
+
+export type AgentRecord = {
+  id: number;
+  agent_id: string;
+  name: string;
+  host: string;
+  agent_type: string;
+  version: string | null;
+  status: 'online' | 'offline' | 'unknown';
+  last_heartbeat: string | null;
+  registered_at: string;
+};
+
+export type CredentialRecord = {
+  id: number;
+  name: string;
+  type: string;
+  created_at: string;
+  updated_at: string | null;
+};
+
 export type SystemInfo = {
   name: string;
   version: string;
@@ -237,7 +356,51 @@ export const api = {
 
   logout: () => session.clear(),
 
+  dashboard: () => request<DashboardSummary>('/api/v1/dashboard'),
+
+  topology: () => request<Topology>('/api/v1/topology'),
+
   listDevices: () => request<Device[]>('/api/v1/devices'),
+
+  deviceData: (id: number) => request<DeviceData>(`/api/v1/devices/${id}/data`),
+
+  auditDevice: (id: number) =>
+    request<{ checks: Finding[]; overall_status: string; summary: string }>(
+      `/api/v1/devices/${id}/audit`,
+      { method: 'POST' },
+    ),
+
+  listAudits: (params: { audit_type?: string; verdict?: string } = {}) => {
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([, value]) => Boolean(value)) as [string, string][],
+    ).toString();
+    return request<AuditRecord[]>(`/api/v1/audits${query ? `?${query}` : ''}`);
+  },
+
+  getAudit: (id: number) => request<StoredAudit>(`/api/v1/audits/${id}`),
+
+  listAgents: () => request<AgentRecord[]>('/api/v1/agents'),
+
+  deleteAgent: (agentId: string) =>
+    request<void>(`/api/v1/agents/${agentId}`, { method: 'DELETE' }),
+
+  listCredentials: () => request<CredentialRecord[]>('/api/v1/credentials'),
+
+  createCredential: (payload: { name: string; type: string; data: Record<string, unknown> }) =>
+    request<{ id: number }>('/api/v1/credentials', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  deleteCredential: (name: string) =>
+    request<void>(`/api/v1/credentials/${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    }),
+
+  logs: (lines = 300) =>
+    request<{ path: string; lines: string[]; note: string | null }>(
+      `/api/v1/logs?lines=${lines}`,
+    ),
 
   createDevice: (device: NewDevice) =>
     request<Device>('/api/v1/devices', {
