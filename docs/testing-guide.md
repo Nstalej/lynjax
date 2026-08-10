@@ -42,8 +42,16 @@ xcopy /E /I ..\frontend\dist lynjax\web
 .venv\Scripts\python.exe -m build
 ```
 
-El paso del `xcopy` **no es opcional**: mete la interfaz compilada dentro del
-paquete. Sin él, el wheel instala una API sin interfaz.
+Más simple y menos propenso a error, desde la raíz del repositorio:
+
+```bash
+PYTHON=backend/.venv/Scripts/python.exe bash scripts/build-release.sh
+```
+
+El script compila la interfaz, la copia dentro del paquete y construye el wheel.
+Falla ruidosamente si la interfaz no acabó dentro, en vez de producir un
+artefacto que instala una API sin pantalla. El paso de copiar la interfaz **no
+es opcional**: sin él, el wheel instala una API sin interfaz.
 
 ---
 
@@ -296,8 +304,11 @@ Y borra a mano el directorio de datos que reporta `lynjax info`.
 Para que no pierdas tiempo reportándolo:
 
 - **Sin límite de intentos en el login.** Se puede probar contraseñas sin freno.
-- **Los informes viven en memoria.** Reiniciar el servidor pierde los generados;
-  hay que volver a ejecutar la auditoría.
+- **Los informes viven en memoria**, los 20 más recientes. Reiniciar el servidor
+  los pierde; hay que volver a ejecutar la auditoría.
+- **`lynjax purge` no alcanza los informes de un servidor en marcha**, porque
+  corre en otro proceso. Para borrarlo todo usa `POST /api/v1/purge` o reinicia
+  el servidor. El comando te lo recuerda al terminar.
 - **Sin tests de interfaz.** El frontend no tiene pruebas automatizadas; por eso
   tus pruebas manuales valen tanto aquí.
 - **Sin Active Directory ni MCP.** Van en v1.5.
